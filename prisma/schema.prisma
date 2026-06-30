@@ -1,0 +1,422 @@
+// ERP PT. Prohaba Jaya Mandiri
+// Database Schema — Prisma + SQLite
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   // TOP_MANAGEMENT | HRD | PJO | LOGISTIK | FINANCE | ENGINEERING | WORKSHOP
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  employee       Employee?
+  progressInputs ProgressItem[]
+  attendancesEntered   Attendance[] @relation("AttendanceEntered")
+  attendancesVerified  Attendance[] @relation("AttendanceVerified")
+  approvals      PayrollApproval[]
+  documents      Document[]
+  mrRequests     MaterialRequest[]
+  purchaseFlags  PurchaseFlag[]
+  auditLogs      AuditLog[]
+}
+
+// ─── PROJECT ──────────────────────────────────────────────────────────────────
+
+model Project {
+  id           String   @id @default(cuid())
+  code         String   @unique // e.g. PRJ-001
+  name         String
+  client       String
+  location     String
+  contractValue Float
+  startDate    DateTime
+  endDate      DateTime
+  status       String   @default("ACTIVE") // ACTIVE | COMPLETED | ON_HOLD
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  boqItems       BOQItem[]
+  progressItems  ProgressItem[]
+  documents      Document[]
+  materialRequests MaterialRequest[]
+  purchaseOrders   PurchaseOrder[]
+  invoices         Invoice[]
+  payrolls         Payroll[]
+  employees        EmployeeProject[]
+  scurveBaselines  SCurveBaseline[]
+}
+
+// ─── S-CURVE & PROGRESS ───────────────────────────────────────────────────────
+
+model BOQItem {
+  id          String  @id @default(cuid())
+  projectId   String
+  code        String  // e.g. 1.1.1
+  description String
+  unit        String
+  quantity    Float
+  unitPrice   Float
+  weight      Float   // bobot % dari total proyek (0–100)
+  category    String  // CIVIL | MECHANICAL | ELECTRICAL | OTHER
+
+  project   Project   @relation(fields: [projectId], references: [id])
+  progress  ProgressItem[]
+}
+
+model SCurveBaseline {
+  id        String   @id @default(cuid())
+  projectId String
+  week      Int      // week number from project start
+  planned   Float    // cumulative planned % at this week
+  date      DateTime
+
+  project Project @relation(fields: [projectId], references: [id])
+}
+
+model ProgressItem {
+  id         String   @id @default(cuid())
+  projectId  String
+  boqItemId  String
+  reportDate DateTime
+  progressPct Float    // 0–100
+  notes      String?
+  photos     String?  // JSON array of photo URLs
+  inputBy    String
+  createdAt  DateTime @default(now())
+
+  project  Project  @relation(fields: [projectId], references: [id])
+  boqItem  BOQItem  @relation(fields: [boqItemId], references: [id])
+  user     User     @relation(fields: [inputBy], references: [id])
+}
+
+// ─── ENGINEERING & DOCUMENTS ──────────────────────────────────────────────────
+
+model Document {
+  id          String   @id @default(cuid())
+  projectId   String
+  title       String
+  docNumber   String
+  revision    String   @default("A")
+  category    String   // DRAWING | SPECIFICATION | REPORT | CALCULATION
+  fileUrl     String
+  fileName    String
+  fileSize    Int
+  targets     String   // JSON: ["SITE", "WORKSHOP"] or either
+  uploadedBy  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project  Project @relation(fields: [projectId], references: [id])
+  uploader User    @relation(fields: [uploadedBy], references: [id])
+}
+
+// ─── MATERIAL REQUEST ─────────────────────────────────────────────────────────
+
+model MaterialRequest {
+  id          String   @id @default(cuid())
+  mrNumber    String   @unique // MR-2024-001
+  projectId   String
+  requestedBy String
+  status      String   @default("DRAFT") // DRAFT | SUBMITTED | APPROVED | REJECTED | PO_CREATED
+  priority    String   @default("NORMAL") // LOW | NORMAL | HIGH | URGENT
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project  Project   @relation(fields: [projectId], references: [id])
+  requester User     @relation(fields: [requestedBy], references: [id])
+  items    MRItem[]
+  po       PurchaseOrder?
+}
+
+model MRItem {
+  id          String  @id @default(cuid())
+  mrId        String
+  description String
+  unit        String
+  quantity    Float
+  specification String?
+
+  mr MaterialRequest @relation(fields: [mrId], references: [id])
+}
+
+// ─── PROCUREMENT & PURCHASE ORDER ────────────────────────────────────────────
+
+model Vendor {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  contact   String?
+  phone     String?
+  email     String?
+  address   String?
+  npwp      String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  purchaseOrders PurchaseOrder[]
+  invoices       Invoice[]
+}
+
+model PurchaseOrder {
+  id          String   @id @default(cuid())
+  poNumber    String   @unique // PO-2024-001
+  projectId   String
+  vendorId    String
+  mrId        String?  @unique
+  status      String   @default("CREATED") // CREATED | SENT | CONFIRMED | PARTIAL | DELIVERED | INVOICED
+  totalAmount Float
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project Project          @relation(fields: [projectId], references: [id])
+  vendor  Vendor           @relation(fields: [vendorId], references: [id])
+  mr      MaterialRequest? @relation(fields: [mrId], references: [id])
+  items   POItem[]
+  invoice Invoice?
+}
+
+model POItem {
+  id          String  @id @default(cuid())
+  poId        String
+  description String
+  unit        String
+  quantity    Float
+  unitPrice   Float
+  totalPrice  Float
+  deliveredQty Float  @default(0)
+
+  po PurchaseOrder @relation(fields: [poId], references: [id])
+}
+
+// ─── SITE PURCHASE (Anti-Markup) ──────────────────────────────────────────────
+
+model PriceReference {
+  id          String   @id @default(cuid())
+  itemCode    String   @unique
+  description String
+  unit        String
+  refPrice    Float    // harga referensi pasar
+  updatedAt   DateTime @updatedAt
+}
+
+model SitePurchase {
+  id          String   @id @default(cuid())
+  projectId   String
+  purchaseDate DateTime
+  description String
+  vendor      String
+  unit        String
+  quantity    Float
+  unitPrice   Float
+  totalAmount Float
+  refPrice    Float?   // harga referensi saat pembelian
+  priceFlag   Boolean  @default(false) // true jika >10% di atas ref
+  flagPct     Float?   // % markup terdeteksi
+  receiptUrl  String?  // bukti struk
+  status      String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  approvedBy  String?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  flags PurchaseFlag[]
+}
+
+model PurchaseFlag {
+  id             String   @id @default(cuid())
+  sitePurchaseId String
+  flaggedBy      String
+  reason         String
+  createdAt      DateTime @default(now())
+
+  sitePurchase SitePurchase @relation(fields: [sitePurchaseId], references: [id])
+  flagger      User         @relation(fields: [flaggedBy], references: [id])
+}
+
+// ─── FINANCE & ACCOUNTS PAYABLE ───────────────────────────────────────────────
+
+model Invoice {
+  id          String   @id @default(cuid())
+  invoiceNo   String   @unique
+  projectId   String
+  vendorId    String
+  poId        String?  @unique
+  invoiceDate DateTime
+  dueDate     DateTime
+  amount      Float
+  tax         Float    @default(0)
+  totalAmount Float
+  status      String   @default("UNPAID") // UNPAID | PARTIAL | PAID | OVERDUE
+  paidAmount  Float    @default(0)
+  paidDate    DateTime?
+  notes       String?
+  fileUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project Project       @relation(fields: [projectId], references: [id])
+  vendor  Vendor        @relation(fields: [vendorId], references: [id])
+  po      PurchaseOrder? @relation(fields: [poId], references: [id])
+  payments Payment[]
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  invoiceId String
+  amount    Float
+  payDate   DateTime
+  method    String   // TRANSFER | CASH | GIRO
+  reference String?  // nomor transfer
+  notes     String?
+  createdAt DateTime @default(now())
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+}
+
+model Revenue {
+  id          String   @id @default(cuid())
+  projectId   String
+  description String
+  amount      Float
+  date        DateTime
+  category    String   // TERMIN | PROGRESS_BILLING | DP | RETENTION_RELEASE
+  notes       String?
+  createdAt   DateTime @default(now())
+}
+
+// ─── HR & PAYROLL ─────────────────────────────────────────────────────────────
+
+model Employee {
+  id            String   @id @default(cuid())
+  userId        String?  @unique
+  employeeNo    String   @unique // EMP-001
+  name          String
+  nik           String   @unique // KTP
+  position      String
+  department    String
+  employeeType  String   // STAFF | HARIAN | BORONGAN
+  baseSalary    Float
+  bpjsKetenagakerjaan String?
+  bpjsKesehatan String?
+  npwp          String?
+  bankAccount   String?
+  bankName      String?
+  joinDate      DateTime
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user        User?            @relation(fields: [userId], references: [id])
+  projects    EmployeeProject[]
+  attendances Attendance[]
+  payrollItems PayrollItem[]
+}
+
+model EmployeeProject {
+  id         String   @id @default(cuid())
+  employeeId String
+  projectId  String
+  startDate  DateTime
+  endDate    DateTime?
+  role       String
+
+  employee Employee @relation(fields: [employeeId], references: [id])
+  project  Project  @relation(fields: [projectId], references: [id])
+}
+
+model Attendance {
+  id          String   @id @default(cuid())
+  employeeId  String
+  date        DateTime
+  status      String   // HADIR | TIDAK_HADIR | IZIN | SAKIT | LIBUR
+  overtime    Float    @default(0) // jam lembur
+  enteredBy   String
+  verifiedBy  String?
+  verifiedAt  DateTime?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  enterUser  User     @relation("AttendanceEntered", fields: [enteredBy], references: [id])
+  verifyUser User?    @relation("AttendanceVerified", fields: [verifiedBy], references: [id])
+}
+
+model Payroll {
+  id          String   @id @default(cuid())
+  projectId   String
+  period      String   // "2024-01" format YYYY-MM
+  periodStart DateTime
+  periodEnd   DateTime
+  totalAmount Float
+  status      String   @default("DRAFT") // DRAFT | SUBMITTED | HRD_APPROVED | FINANCE_APPROVED | PAID
+  notes       String?
+  lockedAt    DateTime? // setelah finance approve, tidak bisa diubah
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project   Project         @relation(fields: [projectId], references: [id])
+  items     PayrollItem[]
+  approvals PayrollApproval[]
+}
+
+model PayrollItem {
+  id            String  @id @default(cuid())
+  payrollId     String
+  employeeId    String
+  workDays      Int
+  overtime      Float   @default(0)
+  baseSalary    Float
+  overtimePay   Float   @default(0)
+  allowances    Float   @default(0)
+  deductions    Float   @default(0)
+  bpjsPay       Float   @default(0)
+  netSalary     Float
+  notes         String?
+
+  payroll  Payroll  @relation(fields: [payrollId], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id])
+}
+
+model PayrollApproval {
+  id         String   @id @default(cuid())
+  payrollId  String
+  approvedBy String
+  role       String   // HRD | FINANCE | TOP_MANAGEMENT
+  action     String   // APPROVED | REJECTED
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  payroll  Payroll @relation(fields: [payrollId], references: [id])
+  approver User    @relation(fields: [approvedBy], references: [id])
+}
+
+// ─── AUDIT LOG ────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String
+  action     String   // CREATE | UPDATE | DELETE | APPROVE | REJECT
+  module     String   // PAYROLL | INVOICE | PO | etc.
+  recordId   String
+  oldValue   String?  // JSON
+  newValue   String?  // JSON
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
