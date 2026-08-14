@@ -12,7 +12,6 @@ function createPrismaClient() {
   const adapter = new PrismaNeon(pool);
   return new PrismaClient({
     adapter,
-    datasourceUrl: process.env.DATABASE_URL,
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
   });
 }
