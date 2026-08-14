@@ -1,19 +1,12 @@
-import { PrismaLibSql } from '@prisma/adapter-libsql';
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
+import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 import bcrypt from 'bcryptjs';
 
-// Build the libsql URL for local file (handle spaces in path)
-const rawPath = `${process.cwd()}/dev.db`;
-const dbUrl = 'file://' + rawPath.split('/').map((p, i) => i > 0 ? encodeURIComponent(p) : p).join('/');
-
-// PrismaLibSql takes {url, authToken} object directly
-const adapter = new PrismaLibSql({ url: dbUrl });
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('🌱 Seeding database ERP Prohaba Jaya Mandiri...');
-  console.log('DB URL:', dbUrl);
 
   // Clean existing data (ignore errors on first run)
   const tables = [
@@ -21,7 +14,7 @@ async function main() {
     'attendance', 'employeeProject', 'employee', 'progressItem',
     'sCurveBaseline', 'bOQItem', 'document', 'mRItem', 'materialRequest',
     'pOItem', 'purchaseOrder', 'payment', 'invoice', 'vendor',
-    'revenue', 'project', 'user',
+    'revenue', 'project', 'purchaseFlag', 'sitePurchase', 'priceReference', 'user',
   ];
   for (const table of tables) {
     try { await prisma[table].deleteMany(); } catch {}

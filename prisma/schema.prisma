@@ -9,6 +9,7 @@ datasource db {
   provider = "postgresql"
 }
 
+
 // ─── AUTH ─────────────────────────────────────────────────────────────────────
 
 model User {
