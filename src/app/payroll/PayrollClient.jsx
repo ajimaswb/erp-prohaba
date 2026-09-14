@@ -12,174 +12,251 @@ export default function PayrollClient({ payrolls }) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val)
   }
 
+  const getInitials = (name) => {
+    return name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase()
+  }
+
   const getStatusBadge = (status) => {
     switch(status) {
-      case 'DRAFT': return <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-medium border border-slate-200">DRAFT</span>
-      case 'SUBMITTED': return <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium border border-blue-200">Menunggu HRD</span>
-      case 'HRD_APPROVED': return <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium border border-amber-200">Menunggu Finance</span>
-      case 'FINANCE_APPROVED': return <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium border border-indigo-200">Menunggu Direktur</span>
-      case 'PAID': return <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium border border-emerald-200">Dibayar</span>
-      default: return <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-medium">{status}</span>
+      case 'DRAFT': return <span className="badge badge-gray">DRAFT</span>
+      case 'SUBMITTED': return <span className="badge badge-info">Menunggu HRD</span>
+      case 'HRD_APPROVED': return <span className="badge badge-warning">Menunggu Finance</span>
+      case 'FINANCE_APPROVED': return <span className="badge badge-navy">Menunggu Direktur</span>
+      case 'PAID': return <span className="badge badge-success">Dibayar</span>
+      default: return <span className="badge badge-gray">{status}</span>
     }
   }
 
   return (
-    <div className="p-8 space-y-6 max-w-7xl mx-auto flex gap-6">
+    <div className="page-container" style={{ display: 'flex', gap: '24px', flexDirection: 'row', alignItems: 'flex-start' }}>
       
       {/* Sidebar List Payroll */}
-      <div className="w-1/3 flex flex-col gap-4">
-        <div className="flex justify-between items-center mb-2">
+      <div style={{ flex: '0 0 350px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="card" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Payroll</h1>
-            <p className="text-slate-500 text-sm">Proses & Approval Gaji</p>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 800, color: 'var(--gray-900)' }}>Payroll</h1>
+            <p style={{ fontSize: '13px', color: 'var(--gray-500)', marginTop: '4px' }}>Proses & Approval Gaji</p>
           </div>
-          <button className="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-lg transition-colors">
-            <Calculator className="w-5 h-5" />
+          <button className="btn btn-orange" style={{ padding: '10px', borderRadius: '12px' }}>
+            <Calculator className="btn-icon" />
           </button>
         </div>
 
-        <div className="flex flex-col gap-3">
-          {payrolls.map((p) => (
-            <div 
-              key={p.id}
-              onClick={() => setSelectedPayroll(p)}
-              className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                selectedPayroll?.id === p.id 
-                ? 'bg-slate-800 text-white border-slate-800 shadow-md transform scale-[1.02]' 
-                : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-              }`}
-            >
-              <div className="flex justify-between items-start mb-2">
-                <span className="font-bold text-lg">{p.period}</span>
-                {getStatusBadge(p.status)}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {payrolls.map((p) => {
+            const isSelected = selectedPayroll?.id === p.id;
+            return (
+              <div 
+                key={p.id}
+                onClick={() => setSelectedPayroll(p)}
+                className="card"
+                style={{
+                  padding: '16px',
+                  cursor: 'pointer',
+                  transition: 'all var(--transition-normal)',
+                  border: isSelected ? '2px solid var(--navy-500)' : '1px solid var(--gray-200)',
+                  boxShadow: isSelected ? 'var(--shadow-md)' : 'var(--shadow-sm)',
+                  transform: isSelected ? 'translateY(-2px)' : 'none',
+                  background: isSelected ? 'var(--navy-50)' : 'white'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                  <span style={{ fontWeight: 700, fontSize: '16px', color: isSelected ? 'var(--navy-800)' : 'var(--gray-800)' }}>{p.period}</span>
+                  {getStatusBadge(p.status)}
+                </div>
+                <p style={{ fontSize: '13.5px', marginBottom: '16px', fontWeight: 500, color: isSelected ? 'var(--navy-600)' : 'var(--gray-600)' }}>
+                  {p.projectName}
+                </p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', borderTop: '1px solid var(--gray-200)', paddingTop: '12px' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--gray-500)', fontWeight: 500 }}>
+                    <UsersIcon style={{ width: '16px', height: '16px' }} /> {p.employeeCount} Pegawai
+                  </span>
+                  <span style={{ fontWeight: 700, color: 'var(--gray-900)' }}>{formatCurrency(p.totalAmount)}</span>
+                </div>
               </div>
-              <p className={`text-sm mb-3 ${selectedPayroll?.id === p.id ? 'text-slate-300' : 'text-slate-500'}`}>
-                {p.projectName}
-              </p>
-              <div className="flex justify-between items-center text-sm">
-                <span className="flex items-center gap-1"><UsersIcon className="w-4 h-4" /> {p.employeeCount} Pegawai</span>
-                <span className="font-semibold">{formatCurrency(p.totalAmount)}</span>
-              </div>
-            </div>
-          ))}
+            )
+          })}
           {payrolls.length === 0 && (
-            <div className="text-center p-8 text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-              Belum ada data Payroll.
+            <div className="card" style={{ textAlign: 'center', padding: '32px', border: '1px dashed var(--gray-300)', background: 'var(--gray-50)' }}>
+              <FileText style={{ width: '32px', height: '32px', margin: '0 auto 12px', color: 'var(--gray-400)' }} />
+              <p style={{ fontWeight: 500, color: 'var(--gray-500)' }}>Belum ada data Payroll.</p>
             </div>
           )}
         </div>
       </div>
 
       {/* Main Content Detail Payroll */}
-      <div className="w-2/3">
+      <div style={{ flex: '1', minWidth: 0 }}>
         {selectedPayroll ? (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full">
+          <div className="card" style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 120px)' }}>
             
             {/* Header Detail */}
-            <div className="p-6 border-b border-slate-200 bg-slate-50 flex justify-between items-start">
+            <div className="card-header" style={{ padding: '24px', background: 'var(--gray-50)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
               <div>
-                <h2 className="text-xl font-bold text-slate-800 mb-1">Rincian Gaji Periode {selectedPayroll.period}</h2>
-                <p className="text-slate-500 text-sm">Proyek: {selectedPayroll.projectName}</p>
+                <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--gray-900)', fontFamily: 'var(--font-display)', marginBottom: '4px' }}>Rincian Gaji Periode {selectedPayroll.period}</h2>
+                <p style={{ fontSize: '14px', color: 'var(--gray-600)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--navy-500)' }}></span>
+                  Proyek: {selectedPayroll.projectName}
+                </p>
               </div>
-              <div className="text-right">
-                <p className="text-sm font-medium text-slate-500 mb-1">Total Tagihan Payroll</p>
-                <p className="text-3xl font-bold text-slate-800">{formatCurrency(selectedPayroll.totalAmount)}</p>
+              <div style={{ textAlign: 'right' }}>
+                <p style={{ fontSize: '12px', fontWeight: 600, color: 'var(--gray-500)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Total Tagihan Payroll</p>
+                <p style={{ fontSize: '28px', fontWeight: 800, color: 'var(--navy-900)', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
+                  {formatCurrency(selectedPayroll.totalAmount)}
+                </p>
               </div>
             </div>
 
             {/* Approval Flow Tracker */}
-            <div className="p-6 border-b border-slate-200 bg-white">
-              <h3 className="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wider">Status Approval</h3>
-              <div className="flex items-center justify-between relative">
-                <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-1 bg-slate-100 z-0 rounded-full"></div>
+            <div style={{ padding: '32px 48px', borderBottom: '1px solid var(--gray-200)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
+                {/* Progress Bar Background */}
+                <div style={{ position: 'absolute', left: '24px', right: '24px', top: '50%', transform: 'translateY(-50%)', height: '6px', background: 'var(--gray-100)', borderRadius: '999px', overflow: 'hidden', zIndex: 0 }}>
+                  <div style={{ 
+                    height: '100%', 
+                    background: 'linear-gradient(90deg, var(--green-500), var(--green-400))', 
+                    transition: 'width 1s ease-in-out',
+                    width: 
+                      selectedPayroll.status === 'DRAFT' ? '0%' :
+                      selectedPayroll.status === 'SUBMITTED' ? '33%' :
+                      selectedPayroll.status === 'HRD_APPROVED' ? '66%' :
+                      selectedPayroll.status === 'FINANCE_APPROVED' ? '100%' :
+                      selectedPayroll.status === 'PAID' ? '100%' : '0%'
+                  }}></div>
+                </div>
                 
                 {/* Step 1: Draft/Submit */}
-                <div className="flex flex-col items-center z-10 gap-2">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedPayroll.status !== 'DRAFT' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
-                    <FileText className="w-5 h-5" />
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 10 }}>
+                  <div style={{ 
+                    width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s',
+                    background: selectedPayroll.status !== 'DRAFT' ? 'linear-gradient(135deg, var(--green-500), var(--green-600))' : 'white',
+                    color: selectedPayroll.status !== 'DRAFT' ? 'white' : 'var(--gray-400)',
+                    border: selectedPayroll.status !== 'DRAFT' ? 'none' : '1px solid var(--gray-200)',
+                    boxShadow: selectedPayroll.status !== 'DRAFT' ? '0 8px 16px rgba(34,197,94,0.25)' : 'var(--shadow-sm)'
+                  }}>
+                    <FileText style={{ width: '24px', height: '24px' }} />
                   </div>
-                  <span className="text-xs font-semibold text-slate-600">Draft</span>
+                  <span style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: selectedPayroll.status !== 'DRAFT' ? 'var(--green-600)' : 'var(--gray-500)' }}>Draft</span>
                 </div>
 
                 {/* Step 2: HRD */}
-                <div className="flex flex-col items-center z-10 gap-2">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${(selectedPayroll.status === 'HRD_APPROVED' || selectedPayroll.status === 'FINANCE_APPROVED' || selectedPayroll.status === 'PAID') ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
-                    <CheckCircle className="w-5 h-5" />
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 10 }}>
+                  <div style={{ 
+                    width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s',
+                    background: (selectedPayroll.status === 'HRD_APPROVED' || selectedPayroll.status === 'FINANCE_APPROVED' || selectedPayroll.status === 'PAID') ? 'linear-gradient(135deg, var(--green-500), var(--green-600))' : (selectedPayroll.status === 'SUBMITTED' ? 'white' : 'white'),
+                    color: (selectedPayroll.status === 'HRD_APPROVED' || selectedPayroll.status === 'FINANCE_APPROVED' || selectedPayroll.status === 'PAID') ? 'white' : (selectedPayroll.status === 'SUBMITTED' ? 'var(--green-500)' : 'var(--gray-400)'),
+                    border: (selectedPayroll.status === 'HRD_APPROVED' || selectedPayroll.status === 'FINANCE_APPROVED' || selectedPayroll.status === 'PAID') ? 'none' : (selectedPayroll.status === 'SUBMITTED' ? '2px solid var(--green-500)' : '1px solid var(--gray-200)'),
+                    boxShadow: (selectedPayroll.status === 'HRD_APPROVED' || selectedPayroll.status === 'FINANCE_APPROVED' || selectedPayroll.status === 'PAID') ? '0 8px 16px rgba(34,197,94,0.25)' : (selectedPayroll.status === 'SUBMITTED' ? '0 4px 12px rgba(34,197,94,0.15)' : 'var(--shadow-sm)')
+                  }}>
+                    <CheckCircle style={{ width: '24px', height: '24px' }} />
                   </div>
-                  <span className="text-xs font-semibold text-slate-600">HRD</span>
+                  <span style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: (selectedPayroll.status === 'HRD_APPROVED' || selectedPayroll.status === 'FINANCE_APPROVED' || selectedPayroll.status === 'PAID') ? 'var(--green-600)' : (selectedPayroll.status === 'SUBMITTED' ? 'var(--green-600)' : 'var(--gray-500)') }}>HRD</span>
                 </div>
 
                 {/* Step 3: Finance */}
-                <div className="flex flex-col items-center z-10 gap-2">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${(selectedPayroll.status === 'FINANCE_APPROVED' || selectedPayroll.status === 'PAID') ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
-                    <Wallet className="w-5 h-5" />
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 10 }}>
+                  <div style={{ 
+                    width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s',
+                    background: (selectedPayroll.status === 'FINANCE_APPROVED' || selectedPayroll.status === 'PAID') ? 'linear-gradient(135deg, var(--green-500), var(--green-600))' : (selectedPayroll.status === 'HRD_APPROVED' ? 'white' : 'white'),
+                    color: (selectedPayroll.status === 'FINANCE_APPROVED' || selectedPayroll.status === 'PAID') ? 'white' : (selectedPayroll.status === 'HRD_APPROVED' ? 'var(--green-500)' : 'var(--gray-400)'),
+                    border: (selectedPayroll.status === 'FINANCE_APPROVED' || selectedPayroll.status === 'PAID') ? 'none' : (selectedPayroll.status === 'HRD_APPROVED' ? '2px solid var(--green-500)' : '1px solid var(--gray-200)'),
+                    boxShadow: (selectedPayroll.status === 'FINANCE_APPROVED' || selectedPayroll.status === 'PAID') ? '0 8px 16px rgba(34,197,94,0.25)' : (selectedPayroll.status === 'HRD_APPROVED' ? '0 4px 12px rgba(34,197,94,0.15)' : 'var(--shadow-sm)')
+                  }}>
+                    <Wallet style={{ width: '24px', height: '24px' }} />
                   </div>
-                  <span className="text-xs font-semibold text-slate-600">Finance</span>
+                  <span style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: (selectedPayroll.status === 'FINANCE_APPROVED' || selectedPayroll.status === 'PAID') ? 'var(--green-600)' : (selectedPayroll.status === 'HRD_APPROVED' ? 'var(--green-600)' : 'var(--gray-500)') }}>Finance</span>
                 </div>
 
                 {/* Step 4: Dirut */}
-                <div className="flex flex-col items-center z-10 gap-2">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedPayroll.status === 'PAID' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
-                    <DollarSign className="w-5 h-5" />
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 10 }}>
+                  <div style={{ 
+                    width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s',
+                    background: selectedPayroll.status === 'PAID' ? 'linear-gradient(135deg, var(--green-500), var(--green-600))' : (selectedPayroll.status === 'FINANCE_APPROVED' ? 'white' : 'white'),
+                    color: selectedPayroll.status === 'PAID' ? 'white' : (selectedPayroll.status === 'FINANCE_APPROVED' ? 'var(--green-500)' : 'var(--gray-400)'),
+                    border: selectedPayroll.status === 'PAID' ? 'none' : (selectedPayroll.status === 'FINANCE_APPROVED' ? '2px solid var(--green-500)' : '1px solid var(--gray-200)'),
+                    boxShadow: selectedPayroll.status === 'PAID' ? '0 8px 16px rgba(34,197,94,0.25)' : (selectedPayroll.status === 'FINANCE_APPROVED' ? '0 4px 12px rgba(34,197,94,0.15)' : 'var(--shadow-sm)')
+                  }}>
+                    <DollarSign style={{ width: '24px', height: '24px' }} />
                   </div>
-                  <span className="text-xs font-semibold text-slate-600">Top Mgmt</span>
+                  <span style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: selectedPayroll.status === 'PAID' ? 'var(--green-600)' : (selectedPayroll.status === 'FINANCE_APPROVED' ? 'var(--green-600)' : 'var(--gray-500)') }}>Top Mgmt</span>
                 </div>
               </div>
             </div>
 
             {/* List Karyawan */}
-            <div className="flex-1 overflow-y-auto p-0">
-              <table className="w-full text-left text-sm text-slate-600">
-                <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 sticky top-0">
-                  <tr>
-                    <th className="px-6 py-4 font-semibold">PEGAWAI</th>
-                    <th className="px-6 py-4 font-semibold">KEHADIRAN</th>
-                    <th className="px-6 py-4 font-semibold">GAJI POKOK</th>
-                    <th className="px-6 py-4 font-semibold">LEMBUR/TUNJ.</th>
-                    <th className="px-6 py-4 font-semibold text-right">TAKE HOME PAY</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {selectedPayroll.items.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-4">
-                        <p className="font-bold text-slate-800">{item.employeeName}</p>
-                        <p className="text-xs text-slate-500">{item.position}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="text-slate-800">{item.workDays} Hari</p>
-                        {item.overtime > 0 && <p className="text-xs text-amber-600">{item.overtime} Jam Lembur</p>}
-                      </td>
-                      <td className="px-6 py-4 text-slate-800 font-medium">{formatCurrency(item.baseSalary)}</td>
-                      <td className="px-6 py-4">
-                        {item.allowances > 0 && <p className="text-emerald-600 text-xs">+ {formatCurrency(item.allowances)} (Tunjangan)</p>}
-                        {item.overtimePay > 0 && <p className="text-emerald-600 text-xs">+ {formatCurrency(item.overtimePay)} (Lembur)</p>}
-                        {item.deductions > 0 && <p className="text-rose-600 text-xs">- {formatCurrency(item.deductions)} (Potongan)</p>}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <p className="font-bold text-emerald-700">{formatCurrency(item.netSalary)}</p>
-                      </td>
+            <div style={{ flex: '1', overflowY: 'auto', padding: 0 }}>
+              <div className="table-wrapper" style={{ border: 'none', borderRadius: 0 }}>
+                <table>
+                  <thead style={{ position: 'sticky', top: 0, zIndex: 10, background: 'var(--gray-50)', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                    <tr>
+                      <th>PEGAWAI</th>
+                      <th>KEHADIRAN</th>
+                      <th>GAJI POKOK</th>
+                      <th>LEMBUR / TUNJ.</th>
+                      <th style={{ textAlign: 'right' }}>TAKE HOME PAY</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {selectedPayroll.items.map((item) => (
+                      <tr key={item.id}>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--navy-50)', color: 'var(--navy-700)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '14px', border: '1px solid var(--navy-100)' }}>
+                              {getInitials(item.employeeName)}
+                            </div>
+                            <div>
+                              <p style={{ fontWeight: 700, color: 'var(--gray-900)' }}>{item.employeeName}</p>
+                              <p style={{ fontSize: '12px', color: 'var(--gray-500)', marginTop: '2px' }}>{item.position}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <p style={{ fontWeight: 600, color: 'var(--gray-800)' }}>{item.workDays} Hari</p>
+                          {item.overtime > 0 && (
+                            <span className="badge badge-warning" style={{ marginTop: '6px' }}>
+                              <Clock style={{ width: '12px', height: '12px' }} /> {item.overtime} Jam
+                            </span>
+                          )}
+                        </td>
+                        <td style={{ fontWeight: 500, color: 'var(--gray-800)' }}>{formatCurrency(item.baseSalary)}</td>
+                        <td>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            {item.allowances > 0 && <span className="badge badge-success" style={{ width: 'fit-content' }}>+ {formatCurrency(item.allowances)} <span style={{ opacity: 0.8, marginLeft: '4px', fontWeight: 500 }}>(Tunjangan)</span></span>}
+                            {item.overtimePay > 0 && <span className="badge badge-success" style={{ width: 'fit-content' }}>+ {formatCurrency(item.overtimePay)} <span style={{ opacity: 0.8, marginLeft: '4px', fontWeight: 500 }}>(Lembur)</span></span>}
+                            {item.deductions > 0 && <span className="badge badge-danger" style={{ width: 'fit-content' }}>- {formatCurrency(item.deductions)} <span style={{ opacity: 0.8, marginLeft: '4px', fontWeight: 500 }}>(Potongan)</span></span>}
+                          </div>
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <p style={{ fontWeight: 800, fontSize: '15px', color: 'var(--green-600)' }}>{formatCurrency(item.netSalary)}</p>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {/* Action Bar */}
-            <div className="p-6 border-t border-slate-200 bg-slate-50 flex justify-between items-center">
-              <p className="text-sm text-slate-500">
-                Data ditarik otomatis dari input absensi PJO.
+            <div className="card-footer" style={{ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+              <p style={{ fontSize: '13px', fontWeight: 500, color: 'var(--gray-500)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--gray-300)' }}></span>
+                Data terintegrasi otomatis dari input absensi PJO.
               </p>
               
-              <div className="flex gap-3">
+              <div style={{ display: 'flex', gap: '12px' }}>
                 {selectedPayroll.status === 'DRAFT' && (
-                  <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">
-                    Submit ke HRD <ArrowRightCircle className="w-4 h-4" />
+                  <button className="btn btn-primary" style={{ padding: '12px 24px' }}>
+                    Submit ke HRD <ArrowRightCircle className="btn-icon" />
                   </button>
                 )}
                 {selectedPayroll.status === 'HRD_APPROVED' && (
-                  <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">
-                    Approve (Finance) <ArrowRightCircle className="w-4 h-4" />
+                  <button className="btn btn-primary" style={{ padding: '12px 24px', background: 'linear-gradient(135deg, var(--green-600), var(--green-500))' }}>
+                    Setujui (Finance) <ArrowRightCircle className="btn-icon" />
+                  </button>
+                )}
+                {selectedPayroll.status === 'FINANCE_APPROVED' && (
+                  <button className="btn" style={{ padding: '12px 24px', background: 'var(--gray-900)', color: 'white' }}>
+                    Setujui & Bayar (Direktur) <ArrowRightCircle className="btn-icon" />
                   </button>
                 )}
               </div>
@@ -187,11 +264,13 @@ export default function PayrollClient({ payrolls }) {
 
           </div>
         ) : (
-          <div className="h-full flex items-center justify-center border border-slate-200 rounded-xl bg-slate-50 border-dashed">
-            <div className="text-center">
-              <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-slate-600">Pilih Data Payroll</h3>
-              <p className="text-slate-400 text-sm mt-1">Pilih periode payroll di samping untuk melihat rincian.</p>
+          <div className="card" style={{ minHeight: 'calc(100vh - 120px)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--gray-50)', border: '1px dashed var(--gray-300)' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--gray-200)', margin: '0 auto 20px', boxShadow: 'var(--shadow-sm)' }}>
+                <FileText style={{ width: '40px', height: '40px', color: 'var(--gray-400)' }} />
+              </div>
+              <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--gray-800)', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>Pilih Data Payroll</h3>
+              <p style={{ fontSize: '14px', color: 'var(--gray-500)', maxWidth: '300px', margin: '0 auto', lineHeight: 1.6 }}>Pilih periode payroll di samping untuk melihat rincian kalkulasi gaji dan status persetujuan.</p>
             </div>
           </div>
         )}

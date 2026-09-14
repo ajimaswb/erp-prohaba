@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
@@ -40,57 +39,9 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 // ─── Main S-Curve Client ───────────────────────────────────────
 export default function SCurveClient({ user, projects, sCurveBaselines, boqItems }) {
-  const router = useRouter();
   const [selectedProject, setSelectedProject] = useState(projects[0] || null);
   const [activeTab, setActiveTab] = useState('scurve');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [inputData, setInputData] = useState({});
-  const [inputDate, setInputDate] = useState(new Date().toISOString().split('T')[0]);
-
-  // Handle progress input change
-  const handleInputChange = (code, field, value) => {
-    setInputData(prev => ({
-      ...prev,
-      [code]: {
-        ...prev[code],
-        [field]: value
-      }
-    }));
-  };
-
-  const handleSubmitProgress = async () => {
-    if (!selectedProject) return;
-    setIsSubmitting(true);
-    try {
-      const boqs = currentBoqs.filter(b => inputData[b.code] && parseFloat(inputData[b.code].progressPct) > b.currentProgress);
-      
-      for (const boq of boqs) {
-        const payload = {
-          projectId: selectedProject.id,
-          boqItemId: boq.id,
-          reportDate: inputDate,
-          progressPct: parseFloat(inputData[boq.code].progressPct),
-          notes: inputData[boq.code].notes || '',
-          inputBy: user.id
-        };
-        
-        await fetch('/api/scurve/progress', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-      }
-      
-      alert('Progress berhasil disimpan!');
-      setInputData({});
-      router.refresh();
-      setActiveTab('scurve');
-    } catch (error) {
-      alert('Gagal menyimpan progress: ' + error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const [showInputForm, setShowInputForm] = useState(false);
 
   // Logic to process the database records into chart data
   const scurveData = useMemo(() => {
@@ -390,12 +341,7 @@ export default function SCurveClient({ user, projects, sCurveBaselines, boqItems
             <div className="form-grid">
               <div className="form-group">
                 <label className="form-label required">Tanggal Laporan</label>
-                <input 
-                  type="date" 
-                  className="form-input" 
-                  value={inputDate}
-                  onChange={(e) => setInputDate(e.target.value)}
-                />
+                <input type="date" className="form-input" defaultValue={new Date().toISOString().split('T')[0]} />
               </div>
               <div className="form-group">
                 <label className="form-label required">Periode</label>
@@ -429,9 +375,8 @@ export default function SCurveClient({ user, projects, sCurveBaselines, boqItems
                         <input
                           type="number"
                           className="form-input"
-                          value={inputData[item.code]?.progressPct ?? item.currentProgress}
-                          onChange={(e) => handleInputChange(item.code, 'progressPct', e.target.value)}
-                          min={item.currentProgress} max="100" step="0.5"
+                          defaultValue={item.currentProgress}
+                          min="0" max="100" step="0.5"
                           style={{ width: 90 }}
                           disabled={item.currentProgress === 100}
                         />
@@ -441,8 +386,6 @@ export default function SCurveClient({ user, projects, sCurveBaselines, boqItems
                           type="text"
                           className="form-input"
                           placeholder="Catatan..."
-                          value={inputData[item.code]?.notes ?? ''}
-                          onChange={(e) => handleInputChange(item.code, 'notes', e.target.value)}
                           disabled={item.currentProgress === 100}
                           style={{ minWidth: 200 }}
                         />
@@ -472,10 +415,10 @@ export default function SCurveClient({ user, projects, sCurveBaselines, boqItems
             </div>
 
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button className="btn btn-outline" onClick={() => setInputData({})}>Reset</button>
-              <button className="btn btn-primary" onClick={handleSubmitProgress} disabled={isSubmitting}>
+              <button className="btn btn-outline">Simpan Draft</button>
+              <button className="btn btn-primary">
                 <CheckCircle size={16} className="inline-block mr-2" />
-                {isSubmitting ? 'Menyimpan...' : 'Submit Progress'}
+                Submit Progress
               </button>
             </div>
           </div>

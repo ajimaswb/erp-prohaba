@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { 
   Users, UserPlus, Clock, ClipboardCheck, 
-  Calendar, CheckCircle, XCircle, Search, Save
+  Calendar, CheckCircle, XCircle, Search, Save, MoreVertical, Building
 } from 'lucide-react'
 
 export default function HRClient({ employees, attendances }) {
@@ -15,133 +15,198 @@ export default function HRClient({ employees, attendances }) {
     emp.employeeNo.toLowerCase().includes(searchEmp.toLowerCase())
   )
 
+  const getInitials = (name) => {
+    return name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase()
+  }
+
+  const getStatusBadge = (status) => {
+    switch(status) {
+      case 'HADIR': return <span className="badge badge-success"><CheckCircle style={{ width: '12px', height: '12px' }} /> HADIR</span>
+      case 'IZIN': return <span className="badge badge-info"><XCircle style={{ width: '12px', height: '12px' }} /> IZIN</span>
+      case 'SAKIT': return <span className="badge badge-warning"><XCircle style={{ width: '12px', height: '12px' }} /> SAKIT</span>
+      default: return <span className="badge badge-danger"><XCircle style={{ width: '12px', height: '12px' }} /> ALPA</span>
+    }
+  }
+
   return (
-    <div className="p-8 space-y-6 max-w-7xl mx-auto">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold text-slate-800 tracking-tight">HR & Kepegawaian</h1>
-        <p className="text-slate-500">Manajemen data karyawan dan rekap absensi proyek.</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-slate-500">Total Karyawan</p>
-            <p className="text-3xl font-bold text-slate-800 mt-1">{employees.length}</p>
-          </div>
-          <div className="p-4 bg-emerald-50 rounded-full">
-            <Users className="w-8 h-8 text-emerald-600" />
-          </div>
+    <div className="page-container" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+      {/* Header Section */}
+      <div className="page-header">
+        <div className="page-header-text">
+          <h1>HR & Kepegawaian</h1>
+          <p>Manajemen data karyawan dan rekap absensi proyek.</p>
         </div>
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-slate-500">Hadir Hari Ini</p>
-            <p className="text-3xl font-bold text-emerald-600 mt-1">
-              {attendances.filter(a => new Date(a.date).toDateString() === new Date().toDateString() && a.status === 'HADIR').length}
-            </p>
-          </div>
-          <div className="p-4 bg-emerald-50 rounded-full">
-            <CheckCircle className="w-8 h-8 text-emerald-600" />
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-slate-500">Tidak Hadir</p>
-            <p className="text-3xl font-bold text-rose-600 mt-1">
-              {attendances.filter(a => new Date(a.date).toDateString() === new Date().toDateString() && a.status !== 'HADIR').length}
-            </p>
-          </div>
-          <div className="p-4 bg-rose-50 rounded-full">
-            <XCircle className="w-8 h-8 text-rose-600" />
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-slate-500">Total Lembur (Bulan Ini)</p>
-            <p className="text-3xl font-bold text-amber-600 mt-1">
-              {attendances.reduce((acc, a) => acc + (a.overtime || 0), 0)} Jam
-            </p>
-          </div>
-          <div className="p-4 bg-amber-50 rounded-full">
-            <Clock className="w-8 h-8 text-amber-600" />
-          </div>
+        <div className="page-header-actions">
+          <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Building style={{ width: '16px', height: '16px' }} />
+            Semua Proyek
+          </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="flex border-b border-slate-200">
-          <button 
-            className={`px-6 py-4 font-medium flex items-center gap-2 ${activeTab === 'employee' ? 'text-emerald-600 border-b-2 border-emerald-600 bg-emerald-50/50' : 'text-slate-600 hover:bg-slate-50'}`}
-            onClick={() => setActiveTab('employee')}
-          >
-            <Users className="w-4 h-4" /> Data Karyawan
-          </button>
-          <button 
-            className={`px-6 py-4 font-medium flex items-center gap-2 ${activeTab === 'attendance' ? 'text-emerald-600 border-b-2 border-emerald-600 bg-emerald-50/50' : 'text-slate-600 hover:bg-slate-50'}`}
-            onClick={() => setActiveTab('attendance')}
-          >
-            <Calendar className="w-4 h-4" /> Rekap Absensi
-          </button>
-          <button 
-            className={`px-6 py-4 font-medium flex items-center gap-2 ${activeTab === 'input' ? 'text-emerald-600 border-b-2 border-emerald-600 bg-emerald-50/50' : 'text-slate-600 hover:bg-slate-50'}`}
-            onClick={() => setActiveTab('input')}
-          >
-            <ClipboardCheck className="w-4 h-4" /> Input Absensi Lapangan
-          </button>
+      {/* Stats Overview */}
+      <div className="kpi-grid">
+        <div className="kpi-card navy">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <p className="kpi-label">Total Karyawan</p>
+              <p className="kpi-value">{employees.length}</p>
+            </div>
+            <div className="kpi-icon">
+              <Users style={{ width: '24px', height: '24px' }} />
+            </div>
+          </div>
         </div>
 
-        <div className="p-6">
+        <div className="kpi-card green">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <p className="kpi-label">Hadir Hari Ini</p>
+              <p className="kpi-value" style={{ color: 'var(--green-600)' }}>
+                {attendances.filter(a => new Date(a.date).toDateString() === new Date().toDateString() && a.status === 'HADIR').length}
+              </p>
+            </div>
+            <div className="kpi-icon">
+              <CheckCircle style={{ width: '24px', height: '24px' }} />
+            </div>
+          </div>
+        </div>
+
+        <div className="kpi-card red">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <p className="kpi-label">Tidak Hadir</p>
+              <p className="kpi-value" style={{ color: 'var(--red-600)' }}>
+                {attendances.filter(a => new Date(a.date).toDateString() === new Date().toDateString() && a.status !== 'HADIR').length}
+              </p>
+            </div>
+            <div className="kpi-icon">
+              <XCircle style={{ width: '24px', height: '24px' }} />
+            </div>
+          </div>
+        </div>
+
+        <div className="kpi-card yellow">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <p className="kpi-label">Total Lembur</p>
+              <p className="kpi-value" style={{ color: 'var(--yellow-600)' }}>
+                {attendances.reduce((acc, a) => acc + (a.overtime || 0), 0)} <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--yellow-500)', opacity: 0.8 }}>Jam</span>
+              </p>
+            </div>
+            <div className="kpi-icon">
+              <Clock style={{ width: '24px', height: '24px' }} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="card">
+        
+        {/* Modern Tabs */}
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--gray-200)', background: 'var(--gray-50)' }}>
+          {[
+            { id: 'employee', icon: Users, label: 'Data Karyawan' },
+            { id: 'attendance', icon: Calendar, label: 'Rekap Absensi' },
+            { id: 'input', icon: ClipboardCheck, label: 'Input Lapangan' },
+          ].map((tab) => {
+            const isActive = activeTab === tab.id;
+            const Icon = tab.icon;
+            return (
+              <button 
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                style={{
+                  position: 'relative',
+                  padding: '16px 24px',
+                  fontWeight: 600,
+                  fontSize: '14px',
+                  color: isActive ? 'var(--navy-800)' : 'var(--gray-500)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  background: isActive ? 'white' : 'transparent',
+                  border: 'none',
+                  borderBottom: isActive ? '3px solid var(--orange-500)' : '3px solid transparent',
+                  cursor: 'pointer',
+                  transition: 'all var(--transition-fast)',
+                }}
+              >
+                <Icon style={{ width: '18px', height: '18px', color: isActive ? 'var(--orange-500)' : 'var(--gray-400)' }} /> 
+                {tab.label}
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="card-body">
+          {/* TAB: DATA KARYAWAN */}
           {activeTab === 'employee' && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <div className="relative w-72">
-                  <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                <div style={{ position: 'relative', width: '300px', maxWidth: '100%' }}>
+                  <Search style={{ width: '20px', height: '20px', position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--gray-400)' }} />
                   <input 
                     type="text" 
                     placeholder="Cari NIK / Nama..." 
-                    className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    className="form-input"
+                    style={{ paddingLeft: '44px' }}
                     value={searchEmp}
                     onChange={(e) => setSearchEmp(e.target.value)}
                   />
                 </div>
-                <button className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-                  <UserPlus className="w-4 h-4" /> Tambah Karyawan
+                <button className="btn btn-primary">
+                  <UserPlus className="btn-icon" /> 
+                  <span>Tambah Pegawai</span>
                 </button>
               </div>
 
-              <div className="overflow-x-auto border border-slate-200 rounded-xl">
-                <table className="w-full text-left text-sm text-slate-600">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-700">
+              <div className="table-wrapper">
+                <table>
+                  <thead>
                     <tr>
-                      <th className="px-6 py-4 font-semibold">NO. PEGAWAI</th>
-                      <th className="px-6 py-4 font-semibold">NAMA</th>
-                      <th className="px-6 py-4 font-semibold">DEPARTEMEN</th>
-                      <th className="px-6 py-4 font-semibold">TIPE</th>
-                      <th className="px-6 py-4 font-semibold">PROYEK AKTIF</th>
-                      <th className="px-6 py-4 font-semibold text-right">AKSI</th>
+                      <th>Pegawai</th>
+                      <th>ID Pegawai</th>
+                      <th>Departemen</th>
+                      <th>Status / Tipe</th>
+                      <th>Proyek Aktif</th>
+                      <th style={{ textAlign: 'right' }}>Aksi</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200">
+                  <tbody>
                     {filteredEmployees.map((emp) => (
-                      <tr key={emp.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4 font-medium text-slate-800">{emp.employeeNo}</td>
-                        <td className="px-6 py-4">
-                          <p className="font-medium text-slate-800">{emp.name}</p>
-                          <p className="text-xs text-slate-500">{emp.position}</p>
+                      <tr key={emp.id}>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--navy-100)', color: 'var(--navy-800)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '14px', border: '1px solid var(--navy-200)' }}>
+                              {getInitials(emp.name)}
+                            </div>
+                            <div>
+                              <p style={{ fontWeight: 700, color: 'var(--gray-900)' }}>{emp.name}</p>
+                              <p style={{ fontSize: '12.5px', color: 'var(--gray-500)', marginTop: '2px' }}>{emp.position}</p>
+                            </div>
+                          </div>
                         </td>
-                        <td className="px-6 py-4">{emp.department}</td>
-                        <td className="px-6 py-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            emp.employeeType === 'STAFF' ? 'bg-blue-100 text-blue-700' :
-                            emp.employeeType === 'HARIAN' ? 'bg-emerald-100 text-emerald-700' :
-                            'bg-amber-100 text-amber-700'
-                          }`}>
-                            {emp.employeeType}
+                        <td style={{ fontWeight: 600, color: 'var(--gray-700)' }}>{emp.employeeNo}</td>
+                        <td style={{ fontWeight: 500, color: 'var(--gray-800)' }}>{emp.department}</td>
+                        <td>
+                          <span className={
+                            emp.employeeType === 'STAFF' ? 'badge badge-info' :
+                            emp.employeeType === 'HARIAN' ? 'badge badge-success' :
+                            'badge badge-warning'
+                          }>
+                            {emp.employeeType === 'HARIAN' ? 'Pekerja Harian' : emp.employeeType}
                           </span>
                         </td>
-                        <td className="px-6 py-4">{emp.activeProject}</td>
-                        <td className="px-6 py-4 text-right">
-                          <button className="text-emerald-600 hover:text-emerald-700 font-medium text-sm bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors">
-                            Detail
+                        <td>
+                          <div style={{ maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500, color: 'var(--gray-700)' }} title={emp.activeProject}>
+                            {emp.activeProject}
+                          </div>
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <button className="btn-ghost" style={{ padding: '8px', borderRadius: '8px' }}>
+                            <MoreVertical style={{ width: '20px', height: '20px' }} />
                           </button>
                         </td>
                       </tr>
@@ -152,42 +217,67 @@ export default function HRClient({ employees, attendances }) {
             </div>
           )}
 
+          {/* TAB: REKAP ABSENSI */}
           {activeTab === 'attendance' && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-lg font-bold text-slate-800">Log Absensi Terbaru</h2>
-                <input type="date" className="border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', background: 'var(--gray-50)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--gray-200)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ padding: '10px', background: 'white', borderRadius: '10px', border: '1px solid var(--gray-200)' }}>
+                    <Calendar style={{ width: '24px', height: '24px', color: 'var(--navy-600)' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontWeight: 700, color: 'var(--gray-900)' }}>Filter Riwayat Absensi</h2>
+                    <p style={{ fontSize: '13px', color: 'var(--gray-500)' }}>Pilih rentang tanggal untuk melihat laporan.</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input type="date" className="form-input" defaultValue={new Date().toISOString().split('T')[0]} />
+                  <button className="btn btn-outline">
+                    Terapkan
+                  </button>
+                </div>
               </div>
-              <div className="overflow-x-auto border border-slate-200 rounded-xl">
-                <table className="w-full text-left text-sm text-slate-600">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-700">
+              
+              <div className="table-wrapper">
+                <table>
+                  <thead>
                     <tr>
-                      <th className="px-6 py-4 font-semibold">TANGGAL</th>
-                      <th className="px-6 py-4 font-semibold">NAMA PEGAWAI</th>
-                      <th className="px-6 py-4 font-semibold">STATUS</th>
-                      <th className="px-6 py-4 font-semibold">LEMBUR</th>
-                      <th className="px-6 py-4 font-semibold">CATATAN</th>
-                      <th className="px-6 py-4 font-semibold">DIINPUT OLEH</th>
+                      <th>Tanggal</th>
+                      <th>Nama Pegawai</th>
+                      <th>Status</th>
+                      <th>Lembur</th>
+                      <th>Catatan</th>
+                      <th>Diinput Oleh</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200">
+                  <tbody>
                     {attendances.map((att) => (
-                      <tr key={att.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4">{new Date(att.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</td>
-                        <td className="px-6 py-4 font-medium text-slate-800">{att.employeeName}</td>
-                        <td className="px-6 py-4">
-                           <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            att.status === 'HADIR' ? 'bg-emerald-100 text-emerald-700' :
-                            att.status === 'IZIN' ? 'bg-blue-100 text-blue-700' :
-                            att.status === 'SAKIT' ? 'bg-amber-100 text-amber-700' :
-                            'bg-rose-100 text-rose-700'
-                          }`}>
-                            {att.status}
-                          </span>
+                      <tr key={att.id}>
+                        <td style={{ fontWeight: 500, color: 'var(--gray-800)' }}>
+                          {new Date(att.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </td>
-                        <td className="px-6 py-4 font-medium text-amber-600">{att.overtime > 0 ? `${att.overtime} Jam` : '-'}</td>
-                        <td className="px-6 py-4 text-slate-500 italic">{att.notes || '-'}</td>
-                        <td className="px-6 py-4">{att.enteredBy}</td>
+                        <td style={{ fontWeight: 700, color: 'var(--gray-900)' }}>{att.employeeName}</td>
+                        <td>
+                          {getStatusBadge(att.status)}
+                        </td>
+                        <td>
+                          {att.overtime > 0 ? (
+                            <span className="badge badge-warning">
+                              <Clock style={{ width: '14px', height: '14px' }} /> {att.overtime} Jam
+                            </span>
+                          ) : (
+                            <span style={{ color: 'var(--gray-400)' }}>-</span>
+                          )}
+                        </td>
+                        <td style={{ color: 'var(--gray-600)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={att.notes}>{att.notes || '-'}</td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--gray-200)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 700, color: 'var(--gray-700)' }}>
+                              {getInitials(att.enteredBy)}
+                            </div>
+                            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--gray-700)' }}>{att.enteredBy}</span>
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -196,50 +286,72 @@ export default function HRClient({ employees, attendances }) {
             </div>
           )}
 
+          {/* TAB: INPUT ABSENSI */}
           {activeTab === 'input' && (
-            <div className="max-w-2xl">
-              <h2 className="text-lg font-bold text-slate-800 mb-6">Input Absensi Harian (Khusus PJO/Mandor)</h2>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Tanggal</label>
-                    <input type="date" className="w-full border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" defaultValue={new Date().toISOString().split('T')[0]} />
+            <div style={{ maxWidth: '800px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              <div style={{ background: 'var(--navy-50)', border: '1px solid var(--navy-100)', borderRadius: 'var(--radius-lg)', padding: '24px', display: 'flex', gap: '20px' }}>
+                <div style={{ padding: '12px', background: 'var(--navy-100)', color: 'var(--navy-700)', borderRadius: '12px', height: 'fit-content' }}>
+                  <ClipboardCheck style={{ width: '32px', height: '32px' }} />
+                </div>
+                <div>
+                  <h3 style={{ fontWeight: 700, color: 'var(--navy-900)', fontSize: '18px' }}>Form Input Kehadiran Lapangan</h3>
+                  <p style={{ fontSize: '14px', color: 'var(--navy-700)', marginTop: '8px', lineHeight: 1.5 }}>Gunakan form ini untuk mencatat kehadiran harian pekerja lapangan. Data yang diinput akan otomatis terhubung ke perhitungan Payroll.</p>
+                </div>
+              </div>
+
+              <div className="card" style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                  <div className="form-group">
+                    <label className="form-label required">Tanggal Pekerjaan</label>
+                    <input type="date" className="form-input" defaultValue={new Date().toISOString().split('T')[0]} />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Pilih Karyawan</label>
-                    <select className="w-full border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
-                      <option>-- Pilih Karyawan --</option>
+                  <div className="form-group">
+                    <label className="form-label required">Pilih Pekerja</label>
+                    <select className="form-select">
+                      <option value="">-- Pilih Pekerja Lapangan --</option>
                       {employees.map(e => (
-                        <option key={e.id} value={e.id}>{e.name} ({e.employeeNo})</option>
+                        <option key={e.id} value={e.id}>{e.name} ({e.employeeType})</option>
                       ))}
                     </select>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Status Kehadiran</label>
-                    <select className="w-full border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
-                      <option value="HADIR">Hadir</option>
-                      <option value="IZIN">Izin</option>
-                      <option value="SAKIT">Sakit</option>
-                      <option value="TIDAK_HADIR">Tanpa Keterangan</option>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', paddingTop: '24px', borderTop: '1px solid var(--gray-100)' }}>
+                  <div className="form-group">
+                    <label className="form-label required">Status Kehadiran</label>
+                    <select className="form-select" style={{ fontWeight: 600 }}>
+                      <option value="HADIR">✅ Hadir (Bekerja)</option>
+                      <option value="IZIN">📝 Izin Resmi</option>
+                      <option value="SAKIT">🤒 Sakit</option>
+                      <option value="TIDAK_HADIR">❌ Mangkir / Alpa</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Jam Lembur (Opsional)</label>
-                    <input type="number" min="0" placeholder="0" className="w-full border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  <div className="form-group">
+                    <label className="form-label">Total Jam Lembur</label>
+                    <div style={{ position: 'relative' }}>
+                      <input type="number" min="0" placeholder="0" className="form-input" style={{ paddingRight: '48px' }} />
+                      <span style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', fontSize: '13px', fontWeight: 600, color: 'var(--gray-400)' }}>Jam</span>
+                    </div>
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Catatan Tambahan</label>
-                  <textarea rows="3" placeholder="Contoh: Lembur pengecoran pilar..." className="w-full border border-slate-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+                <div className="form-group" style={{ paddingTop: '24px', borderTop: '1px solid var(--gray-100)' }}>
+                  <label className="form-label">Catatan Pekerjaan / Lembur (Opsional)</label>
+                  <textarea 
+                    rows="3" 
+                    placeholder="Contoh: Pekerja lembur untuk menyelesaikan pengecoran pilar blok A..." 
+                    className="form-input"
+                    style={{ resize: 'vertical' }}
+                  ></textarea>
                 </div>
 
-                <div className="pt-4 border-t border-slate-200 flex justify-end">
-                  <button className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors">
-                    <Save className="w-4 h-4" /> Simpan Absensi
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '12px' }}>
+                  <button className="btn btn-ghost">
+                    Batal
+                  </button>
+                  <button className="btn btn-primary" style={{ padding: '12px 32px' }}>
+                    <Save className="btn-icon" /> 
+                    Simpan Data
                   </button>
                 </div>
               </div>
