@@ -64,12 +64,12 @@
 
   /* Shadows */
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-md: 0 4px 12px -1px rgb(0 0 0 / 0.05), 0 2px 6px -2px rgb(0 0 0 / 0.03);
+  --shadow-lg: 0 12px 24px -4px rgb(0 0 0 / 0.06), 0 6px 12px -6px rgb(0 0 0 / 0.04);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  --shadow-navy: 0 4px 14px 0 rgb(15 43 91 / 0.25);
-  --shadow-orange: 0 4px 14px 0 rgb(249 115 22 / 0.3);
+  --shadow-navy: 0 8px 20px 0 rgb(15 43 91 / 0.15);
+  --shadow-orange: 0 8px 20px 0 rgb(249 115 22 / 0.18);
 
   /* Border Radius */
   --radius-sm:  6px;
@@ -941,9 +941,12 @@ tbody tr:hover {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
+  padding: 64px 24px;
   text-align: center;
-  color: var(--gray-400);
+  background: var(--gray-50);
+  border: 1px dashed var(--gray-300);
+  border-radius: var(--radius-lg);
+  margin: 24px;
 }
 
 .empty-state svg {
@@ -1342,3 +1345,18 @@ tbody tr:hover {
 .rounded      { border-radius: var(--radius-md); }
 .truncate     { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sr-only      { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+
+.empty-state-icon {
+  color: var(--gray-400);
+  margin-bottom: 16px;
+  opacity: 0.8;
+}
+
+
+.inline-block { display: inline-block; }
+.mr-2 { margin-right: 8px; }
+.mr-1 { margin-right: 4px; }
+.text-red-500 { color: var(--red-500); }
+.text-yellow-500 { color: var(--yellow-500); }
+.text-gray-400 { color: var(--gray-400); }

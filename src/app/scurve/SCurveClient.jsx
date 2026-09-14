@@ -1,4 +1,5 @@
 'use client';
+import { LineChart as LucideLineChart, Building2, Calendar, Target, AlertTriangle, BarChart3, Activity } from 'lucide-react';
 
 import { useState } from 'react';
 import {
@@ -192,7 +193,7 @@ export default function SCurveClient({ user }) {
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               {parseFloat(deviation) < 0 && (
-                <span className="badge badge-danger">⚠️ Behind {Math.abs(deviation)}%</span>
+                <span className="badge badge-danger"><AlertTriangle size={16} className="mr-2 inline-block text-yellow-500" /> Behind {Math.abs(deviation)}%</span>
               )}
               {parseFloat(deviation) > 0 && (
                 <span className="badge badge-success">✅ Ahead {deviation}%</span>
@@ -297,7 +298,7 @@ export default function SCurveClient({ user }) {
             }}>
               <div style={{ flex: 1, minWidth: 200 }}>
                 <div style={{ fontWeight: 700, fontSize: 13.5, marginBottom: 4, color: 'var(--gray-900)' }}>
-                  {parseFloat(deviation) < 0 ? '⚠️ Analisis: Behind Schedule' : parseFloat(deviation) > 0 ? '✅ Analisis: Ahead of Schedule' : '✅ Analisis: On Track'}
+                  {parseFloat(deviation) < 0 ? '<AlertTriangle size={16} className="mr-2 inline-block text-yellow-500" /> Analisis: Behind Schedule' : parseFloat(deviation) > 0 ? '✅ Analisis: Ahead of Schedule' : '✅ Analisis: On Track'}
                 </div>
                 <div style={{ fontSize: 12.5, color: 'var(--gray-600)', lineHeight: 1.6 }}>
                   {parseFloat(deviation) < 0

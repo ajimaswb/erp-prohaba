@@ -1,4 +1,5 @@
 'use client';
+import { DollarSign, TrendingUp, Clock, AlertTriangle, LayoutDashboard, Building2, Bell, Hourglass, MapPin, Activity } from 'lucide-react';
 
 import { useState } from 'react';
 import {
@@ -79,7 +80,7 @@ const PENDING_APPROVALS = [
   { id: 1, type: 'MR', number: 'MR-2024-047', project: 'PRJ-001', requestedBy: 'Ahmad Fauzi', value: null, status: 'Menunggu PJO' },
   { id: 2, type: 'PO', number: 'PO-2024-089', project: 'PRJ-002', requestedBy: 'Logistik', value: 245000000, status: 'Menunggu Finance' },
   { id: 3, type: 'PAYROLL', number: 'PAY-JUN-003', project: 'PRJ-003', requestedBy: 'HRD', value: 387500000, status: 'Menunggu Finance' },
-  { id: 4, type: 'PURCHASE', number: 'SP-2024-012', project: 'PRJ-006', requestedBy: 'Budi Santoso', value: 4500000, status: '⚠️ Harga Markup' },
+  { id: 4, type: 'PURCHASE', number: 'SP-2024-012', project: 'PRJ-006', requestedBy: 'Budi Santoso', value: 4500000, status: '<AlertTriangle size={18} className="text-red-500" /> Harga Markup' },
 ];
 
 // ─── Formatters ───────────────────────────────────────────────
@@ -247,7 +248,7 @@ export default function DashboardClient({ user }) {
         <div className="card">
           <div className="card-header">
             <div className="card-title">
-              📈 Pendapatan & Profit Bulanan
+              <TrendingUp size={24} strokeWidth={2.5} /> Pendapatan & Profit Bulanan
             </div>
             <span className="badge badge-success">YTD 2024</span>
           </div>
@@ -313,7 +314,7 @@ export default function DashboardClient({ user }) {
         {/* Alert Panel */}
         <div className="card">
           <div className="card-header">
-            <div className="card-title">🔔 Alert & Notifikasi</div>
+            <div className="card-title"><Bell size={16} className="mr-2 inline-block" /> Alert & Notifikasi</div>
             <span className="badge badge-danger">{ALERTS.length} Aktif</span>
           </div>
           <div className="card-body" style={{ padding: '8px 0' }}>
@@ -344,7 +345,7 @@ export default function DashboardClient({ user }) {
         {/* Pending Approvals */}
         <div className="card">
           <div className="card-header">
-            <div className="card-title">⏳ Menunggu Persetujuan</div>
+            <div className="card-title"><Hourglass size={16} className="mr-2 inline-block" /> Menunggu Persetujuan</div>
             <span className="badge badge-warning">{PENDING_APPROVALS.length} Pending</span>
           </div>
           <div className="card-body" style={{ padding: '8px 0' }}>
@@ -383,7 +384,7 @@ export default function DashboardClient({ user }) {
       {/* Project Table */}
       <div className="card">
         <div className="card-header">
-          <div className="card-title">🏗️ Status Semua Proyek</div>
+          <div className="card-title"><Building2 size={16} className="mr-2 inline-block" /> Status Semua Proyek</div>
           <div style={{ display: 'flex', gap: 8 }}>
             <span className="badge badge-success">7 Aktif</span>
             <button className="btn btn-outline btn-sm">
@@ -420,7 +421,7 @@ export default function DashboardClient({ user }) {
                       <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--gray-900)', maxWidth: 260 }}>
                         {p.name}
                       </div>
-                      <div style={{ fontSize: 11.5, color: 'var(--gray-500)' }}>📍 {p.location}</div>
+                      <div style={{ fontSize: 11.5, color: 'var(--gray-500)' }}><MapPin size={12} className="mr-1 inline-block" /> {p.location}</div>
                     </td>
                     <td style={{ fontSize: 12.5, color: 'var(--gray-600)', maxWidth: 180 }}>
                       {p.client}

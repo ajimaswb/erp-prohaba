@@ -1,6 +1,7 @@
 'use client';
-
 import { useState } from 'react';
+
+import { CreditCard, Users, CheckSquare, AlertTriangle, Clock, Building2, UserCog, UserCheck, CheckCircle } from 'lucide-react';
 
 const EMPLOYEES = [
   { id: '1', no: 'EMP-001', name: 'Ahmad Fauzi', position: 'Site Supervisor', type: 'STAFF', project: 'PRJ-001', workDays: 26, overtime: 12, baseSalary: 8500000, allowances: 2000000, deductions: 850000, bpjs: 425000, netSalary: 9225000 },

@@ -9,8 +9,8 @@ async function main() {
     'auditLog', 'payrollApproval', 'payrollItem', 'payroll',
     'attendance', 'employeeProject', 'employee', 'progressItem',
     'sCurveBaseline', 'bOQItem', 'document', 'mRItem', 'materialRequest',
-    'pOItem', 'purchaseOrder', 'payment', 'invoice', 'vendor',
-    'revenue', 'project', 'purchaseFlag', 'sitePurchase', 'priceReference', 'user',
+    'pOItem', 'purchaseOrder', 'journalVoucher', 'purchaseInvoice', 'vendor',
+    'salesInvoice', 'project', 'purchaseFlag', 'sitePurchase', 'priceReference', 'user',
   ];
   for (const table of tables) {
     try { await prisma[table].deleteMany(); } catch {}
@@ -39,6 +39,24 @@ async function main() {
     prisma.project.create({ data: { code: 'PRJ-006', name: 'Workshop & Maintenance Facility', client: 'PT. Indominco Mandiri', location: 'Bontang, Kalimantan Timur', contractValue: 5100000000, startDate: new Date('2024-05-01'), endDate: new Date('2025-01-31') } }),
     prisma.project.create({ data: { code: 'PRJ-007', name: 'Rehabilitasi & Upgrade Fasilitas Produksi', client: 'PT. Trubaindo Coal Mining', location: 'Kutai Barat, Kalimantan Timur', contractValue: 3900000000, startDate: new Date('2024-02-15'), endDate: new Date('2024-11-30') } }),
   ]);
+
+
+  // ─── GL Accounts ─────────────────────────────────────────
+  console.log('Creating GL Accounts...');
+  await prisma.gLAccount.createMany({
+    data: [
+      { accountNo: '1100.01', name: 'Kas Kecil', accountType: 'KAS_BANK', balance: 15000000 },
+      { accountNo: '1100.02', name: 'Bank Mandiri IDR', accountType: 'KAS_BANK', balance: 1250000000 },
+      { accountNo: '1200.01', name: 'Piutang Usaha', accountType: 'PIUTANG', balance: 4500000000 },
+      { accountNo: '1300.01', name: 'Persediaan Material', accountType: 'PERSEDIAAN', balance: 850000000 },
+      { accountNo: '2100.01', name: 'Hutang Pemasok', accountType: 'HUTANG', balance: 2150000000 },
+      { accountNo: '3100.01', name: 'Modal Disetor', accountType: 'EKUITAS', balance: 5000000000 },
+      { accountNo: '4100.01', name: 'Pendapatan Konstruksi', accountType: 'PENDAPATAN', balance: 8500000000 },
+      { accountNo: '5100.01', name: 'Beban Material', accountType: 'HARGA_POKOK_PENJUALAN', balance: 3200000000 },
+      { accountNo: '5100.02', name: 'Beban Subkon', accountType: 'HARGA_POKOK_PENJUALAN', balance: 1100000000 },
+      { accountNo: '6100.01', name: 'Beban Gaji & Upah', accountType: 'BEBAN', balance: 450000000 },
+    ],
+  });
 
   // ─── Vendors ─────────────────────────────────────────────
   console.log('Creating vendors...');

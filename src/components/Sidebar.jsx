@@ -2,6 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import {
+  LayoutDashboard, Building2, LineChart, Ruler,
+  Wrench, Package, ShoppingCart, ShoppingBag,
+  DollarSign, Banknote, Users, Calendar,
+  CreditCard, UserCog, History
+} from 'lucide-react';
+
 
 const ROLE_LABELS = {
   TOP_MANAGEMENT: 'Top Management',
@@ -17,41 +24,41 @@ const NAV_ITEMS = [
   {
     section: 'Utama',
     items: [
-      { href: '/dashboard', label: 'Dashboard', icon: '📊', roles: ['ALL'] },
-      { href: '/projects', label: 'Proyek', icon: '🏗️', roles: ['ALL'] },
+      { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['ALL'] },
+      { href: '/projects', label: 'Proyek', icon: Building2, roles: ['ALL'] },
     ],
   },
   {
     section: 'Operasional',
     items: [
-      { href: '/scurve', label: 'S-Curve & Progress', icon: '📈', roles: ['TOP_MANAGEMENT', 'PJO', 'FINANCE', 'ENGINEERING'] },
-      { href: '/documents', label: 'Dokumen Engineering', icon: '📐', roles: ['TOP_MANAGEMENT', 'ENGINEERING', 'PJO', 'WORKSHOP'] },
-      { href: '/workshop', label: 'Workshop', icon: '🔧', roles: ['TOP_MANAGEMENT', 'ENGINEERING', 'WORKSHOP', 'PJO'] },
-      { href: '/material-request', label: 'Material Request', icon: '📦', roles: ['TOP_MANAGEMENT', 'PJO', 'LOGISTIK'] },
-      { href: '/procurement', label: 'Procurement & PO', icon: '🛒', roles: ['TOP_MANAGEMENT', 'LOGISTIK', 'FINANCE'] },
-      { href: '/site-purchase', label: 'Pembelian Site', icon: '🛍️', roles: ['TOP_MANAGEMENT', 'PJO', 'LOGISTIK', 'FINANCE'] },
+      { href: '/scurve', label: 'S-Curve & Progress', icon: LineChart, roles: ['TOP_MANAGEMENT', 'PJO', 'FINANCE', 'ENGINEERING'] },
+      { href: '/documents', label: 'Dokumen Engineering', icon: Ruler, roles: ['TOP_MANAGEMENT', 'ENGINEERING', 'PJO', 'WORKSHOP'] },
+      { href: '/workshop', label: 'Workshop', icon: Wrench, roles: ['TOP_MANAGEMENT', 'ENGINEERING', 'WORKSHOP', 'PJO'] },
+      { href: '/material-request', label: 'Material Request', icon: Package, roles: ['TOP_MANAGEMENT', 'PJO', 'LOGISTIK'] },
+      { href: '/procurement', label: 'Procurement & PO', icon: ShoppingCart, roles: ['TOP_MANAGEMENT', 'LOGISTIK', 'FINANCE'] },
+      { href: '/site-purchase', label: 'Pembelian Site', icon: ShoppingBag, roles: ['TOP_MANAGEMENT', 'PJO', 'LOGISTIK', 'FINANCE'] },
     ],
   },
   {
     section: 'Keuangan',
     items: [
-      { href: '/finance', label: 'Keuangan & AP', icon: '💰', roles: ['TOP_MANAGEMENT', 'FINANCE'] },
-      { href: '/revenue', label: 'Pendapatan', icon: '💵', roles: ['TOP_MANAGEMENT', 'FINANCE'] },
+      { href: '/finance', label: 'Keuangan & AP', icon: DollarSign, roles: ['TOP_MANAGEMENT', 'FINANCE'] },
+      { href: '/revenue', label: 'Pendapatan', icon: Banknote, roles: ['TOP_MANAGEMENT', 'FINANCE'] },
     ],
   },
   {
     section: 'SDM',
     items: [
-      { href: '/employees', label: 'Data Karyawan', icon: '👷', roles: ['TOP_MANAGEMENT', 'HRD'] },
-      { href: '/attendance', label: 'Absensi', icon: '🗓️', roles: ['TOP_MANAGEMENT', 'HRD', 'PJO'] },
-      { href: '/payroll', label: 'Payroll', icon: '💳', roles: ['TOP_MANAGEMENT', 'HRD', 'FINANCE'] },
+      { href: '/employees', label: 'Data Karyawan', icon: Users, roles: ['TOP_MANAGEMENT', 'HRD'] },
+      { href: '/attendance', label: 'Absensi', icon: Calendar, roles: ['TOP_MANAGEMENT', 'HRD', 'PJO'] },
+      { href: '/payroll', label: 'Payroll', icon: CreditCard, roles: ['TOP_MANAGEMENT', 'HRD', 'FINANCE'] },
     ],
   },
   {
     section: 'Sistem',
     items: [
-      { href: '/users', label: 'Pengguna', icon: '👤', roles: ['TOP_MANAGEMENT'] },
-      { href: '/audit-log', label: 'Audit Log', icon: '🔍', roles: ['TOP_MANAGEMENT'] },
+      { href: '/users', label: 'Pengguna', icon: UserCog, roles: ['TOP_MANAGEMENT'] },
+      { href: '/audit-log', label: 'Audit Log', icon: History, roles: ['TOP_MANAGEMENT'] },
     ],
   },
 ];
@@ -91,6 +98,7 @@ export default function Sidebar({ user }) {
               {visibleItems.map((item) => {
                 const isActive = pathname === item.href ||
                   (item.href !== '/dashboard' && pathname.startsWith(item.href));
+                const Icon = item.icon;
 
                 return (
                   <Link
@@ -98,7 +106,7 @@ export default function Sidebar({ user }) {
                     href={item.href}
                     className={`nav-item ${isActive ? 'active' : ''}`}
                   >
-                    <span style={{ fontSize: '15px' }}>{item.icon}</span>
+                    <Icon size={18} className="nav-icon" />
                     <span>{item.label}</span>
                     {item.badge && (
                       <span className="nav-badge">{item.badge}</span>
