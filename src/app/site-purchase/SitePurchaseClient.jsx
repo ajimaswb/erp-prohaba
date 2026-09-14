@@ -1,12 +1,26 @@
 'use client';
 
 import { useState } from 'react';
-import { ShoppingBag, AlertTriangle, CheckCircle, ShieldAlert, FileText, Search, Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ShoppingBag, AlertTriangle, CheckCircle, ShieldAlert, FileText, Search, Plus, Info } from 'lucide-react';
 
 export default function SitePurchaseClient({ sitePurchases, projects, projectDict, priceReferences, user }) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('list');
   const [searchCode, setSearchCode] = useState('');
   const [refPriceFound, setRefPriceFound] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [formData, setFormData] = useState({
+    projectId: projects.length > 0 ? projects[0].id : '',
+    purchaseDate: new Date().toISOString().split('T')[0],
+    vendor: '',
+    description: '',
+    quantity: '',
+    unit: '',
+    unitPrice: '',
+    notes: ''
+  });
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amount);
@@ -15,6 +29,54 @@ export default function SitePurchaseClient({ sitePurchases, projects, projectDic
   const checkPrice = (code) => {
     const ref = priceReferences.find(r => r.itemCode === code || r.description.toLowerCase().includes(code.toLowerCase()));
     setRefPriceFound(ref || null);
+    if (ref) {
+      setFormData(prev => ({ ...prev, description: ref.description, unit: ref.unit }));
+    } else {
+      setFormData(prev => ({ ...prev, description: code, unit: '' }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        ...formData,
+        refPrice: refPriceFound ? refPriceFound.refPrice : null,
+        userId: user.id
+      };
+
+      const res = await fetch('/api/site-purchase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Gagal menyimpan transaksi');
+      }
+
+      alert('Bukti pembelian berhasil disubmit!');
+      setFormData({
+        projectId: projects.length > 0 ? projects[0].id : '',
+        purchaseDate: new Date().toISOString().split('T')[0],
+        vendor: '',
+        description: '',
+        quantity: '',
+        unit: '',
+        unitPrice: '',
+        notes: ''
+      });
+      setSearchCode('');
+      setRefPriceFound(null);
+      setActiveTab('list');
+      router.refresh();
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -113,25 +175,29 @@ export default function SitePurchaseClient({ sitePurchases, projects, projectDic
               </div>
             </div>
 
-            <div className="form-grid">
-              <div className="form-group">
-                <label className="form-label required">Proyek</label>
-                <select className="form-input form-select">
-                  {projects.map(p => (
-                    <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
-                  ))}
-                </select>
+            <form onSubmit={handleSubmit}>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label className="form-label required">Proyek</label>
+                  <select className="form-input form-select" required
+                    value={formData.projectId} onChange={e => setFormData({...formData, projectId: e.target.value})}>
+                    {projects.map(p => (
+                      <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label required">Tanggal Beli (di Nota)</label>
+                  <input type="date" className="form-input" required
+                    value={formData.purchaseDate} onChange={e => setFormData({...formData, purchaseDate: e.target.value})} />
+                </div>
               </div>
-              <div className="form-group">
-                <label className="form-label required">Tanggal Beli (di Nota)</label>
-                <input type="date" className="form-input" defaultValue={new Date().toISOString().split('T')[0]} />
-              </div>
-            </div>
 
-            <div className="form-group" style={{ marginTop: 20 }}>
-              <label className="form-label required">Nama Toko / Supplier Lokal</label>
-              <input type="text" className="form-input" placeholder="Toko Material Maju Bersama..." />
-            </div>
+              <div className="form-group" style={{ marginTop: 20 }}>
+                <label className="form-label required">Nama Toko / Supplier Lokal</label>
+                <input type="text" className="form-input" required placeholder="Toko Material Maju Bersama..."
+                  value={formData.vendor} onChange={e => setFormData({...formData, vendor: e.target.value})} />
+              </div>
 
             <hr style={{ margin: '24px 0', borderTop: '1px solid var(--gray-200)' }} />
 
@@ -171,20 +237,23 @@ export default function SitePurchaseClient({ sitePurchases, projects, projectDic
                   </div>
                 )}
 
-                <div className="form-grid" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                  <div className="form-group">
-                    <label className="form-label required">Kuantitas</label>
-                    <input type="number" className="form-input" placeholder="0" />
+                  <div className="form-grid" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+                    <div className="form-group">
+                      <label className="form-label required">Kuantitas</label>
+                      <input type="number" className="form-input" required placeholder="0" step="0.01"
+                        value={formData.quantity} onChange={e => setFormData({...formData, quantity: e.target.value})} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label required">Satuan</label>
+                      <input type="text" className="form-input" required placeholder="Sak / Btg"
+                        value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label required">Harga Satuan (Nota)</label>
+                      <input type="number" className="form-input" required placeholder="Rp..."
+                        value={formData.unitPrice} onChange={e => setFormData({...formData, unitPrice: e.target.value})} />
+                    </div>
                   </div>
-                  <div className="form-group">
-                    <label className="form-label required">Satuan</label>
-                    <input type="text" className="form-input" placeholder="Sak / Btg" defaultValue={refPriceFound?.unit || ''} />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label required">Harga Satuan (Nota)</label>
-                    <input type="number" className="form-input" placeholder="Rp..." />
-                  </div>
-                </div>
               </div>
               
               <div style={{ width: 300, background: 'var(--gray-50)', border: '1px dashed var(--gray-300)', borderRadius: 'var(--radius-md)', padding: 20, textAlign: 'center' }}>
@@ -194,18 +263,20 @@ export default function SitePurchaseClient({ sitePurchases, projects, projectDic
               </div>
             </div>
 
-            <div className="form-group" style={{ marginTop: 20 }}>
-              <label className="form-label">Keterangan / Alasan Pembelian Mendadak</label>
-              <textarea className="form-input" rows="2" placeholder="Jelaskan mengapa barang tidak di-request melalui pusat..."></textarea>
-            </div>
+              <div className="form-group" style={{ marginTop: 20 }}>
+                <label className="form-label">Keterangan / Alasan Pembelian Mendadak</label>
+                <textarea className="form-input" rows="2" placeholder="Jelaskan mengapa barang tidak di-request melalui pusat..."
+                  value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})}></textarea>
+              </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 24 }}>
-              <button className="btn btn-outline" onClick={() => setActiveTab('list')}>Batal</button>
-              <button className="btn btn-primary">
-                <CheckCircle size={16} className="inline-block mr-2" />
-                Submit Bukti Pembelian
-              </button>
-            </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 24 }}>
+                <button type="button" className="btn btn-outline" onClick={() => setActiveTab('list')}>Batal</button>
+                <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+                  <CheckCircle size={16} className="inline-block mr-2" />
+                  {isSubmitting ? 'Submitting...' : 'Submit Bukti Pembelian'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

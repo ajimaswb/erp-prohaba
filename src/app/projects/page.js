@@ -1,15 +1,28 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import AppLayout from '@/components/AppLayout';
+import { prisma } from '@/lib/prisma';
+import ProjectsClient from './ProjectsClient';
 
-import { Building2 } from 'lucide-react';
+export const metadata = {
+  title: 'Manajemen Proyek — ERP Prohaba Jaya Mandiri',
+};
 
 export default async function ProjectsPage() {
   const session = await auth();
   if (!session) redirect('/login');
+
+  const projects = await prisma.project.findMany({
+    orderBy: { createdAt: 'desc' }
+  });
+
   return (
-    <AppLayout title="Manajemen Proyek" subtitle="7 proyek aktif" user={session.user}>
-      <div className="card"><div className="card-body"><div className="empty-state"><Building2 size={48} className="empty-state-icon" /><h3>Modul Proyek</h3><p>Segera tersedia. Data proyek ditampilkan di Dashboard.</p></div></div></div>
+    <AppLayout 
+      title="Manajemen Proyek" 
+      subtitle={`${projects.length} proyek aktif`} 
+      user={session.user}
+    >
+      <ProjectsClient initialProjects={projects} />
     </AppLayout>
   );
 }
