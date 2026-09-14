@@ -49,8 +49,7 @@ const NAV_ITEMS = [
   {
     section: 'SDM',
     items: [
-      { href: '/employees', label: 'Data Karyawan', icon: Users, roles: ['TOP_MANAGEMENT', 'HRD'] },
-      { href: '/attendance', label: 'Absensi', icon: Calendar, roles: ['TOP_MANAGEMENT', 'HRD', 'PJO'] },
+      { href: '/hr', label: 'Karyawan & Absensi', icon: Users, roles: ['TOP_MANAGEMENT', 'HRD', 'PJO'] },
       { href: '/payroll', label: 'Payroll', icon: CreditCard, roles: ['TOP_MANAGEMENT', 'HRD', 'FINANCE'] },
     ],
   },

@@ -1,15 +1,29 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
 import AppLayout from '@/components/AppLayout';
-
-import { Package } from 'lucide-react';
+import MaterialRequestClient from './MaterialRequestClient';
 
 export default async function MaterialRequestPage() {
   const session = await auth();
   if (!session) redirect('/login');
+
+  const requests = await prisma.materialRequest.findMany({
+    include: {
+      project: true,
+      requester: true,
+      items: true,
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  const projects = await prisma.project.findMany({
+    orderBy: { code: 'asc' }
+  });
+
   return (
-    <AppLayout title="Material Request" subtitle="Permintaan material dari site & workshop" user={session.user}>
-      <div className="card"><div className="card-body"><div className="empty-state"><Package size={48} className="empty-state-icon" /><h3>Modul Material Request</h3><p>Form MR dari lapangan dengan approval chain PJO → Logistik. Fase 2.</p></div></div></div>
+    <AppLayout title="Material Request" subtitle="Permintaan material & alat dari Site ke Pusat" user={session.user}>
+      <MaterialRequestClient requests={requests} projects={projects} user={session.user} />
     </AppLayout>
   );
 }

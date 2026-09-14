@@ -9,8 +9,8 @@ async function main() {
     'auditLog', 'payrollApproval', 'payrollItem', 'payroll',
     'attendance', 'employeeProject', 'employee', 'progressItem',
     'sCurveBaseline', 'bOQItem', 'document', 'mRItem', 'materialRequest',
-    'pOItem', 'purchaseOrder', 'journalVoucher', 'purchaseInvoice', 'vendor',
-    'salesInvoice', 'project', 'purchaseFlag', 'sitePurchase', 'priceReference', 'user',
+    'pOItem', 'purchaseOrder', 'journalVoucherItem', 'journalVoucher', 'purchaseInvoice', 'vendor',
+    'salesInvoice', 'project', 'purchaseFlag', 'sitePurchase', 'priceReference', 'user', 'gLAccount'
   ];
   for (const table of tables) {
     try { await prisma[table].deleteMany(); } catch {}
@@ -67,6 +67,243 @@ async function main() {
       { code: 'VND-003', name: 'PT. Logam Prima', contact: 'Pak Joko', phone: '0878-1111-2222' },
     ],
   });
+
+  // ─── S-Curve & BOQ Data ────────────────────────────────
+  console.log('Creating BOQ & S-Curve Data...');
+  const prj1 = await prisma.project.findFirst({ where: { code: 'PRJ-001' } });
+  const pjo = await prisma.user.findFirst({ where: { role: 'PJO' } });
+  const logistik = await prisma.user.findFirst({ where: { role: 'LOGISTIK' } });
+  const vendor1 = await prisma.vendor.findFirst({ where: { code: 'VND-001' } });
+
+  if (prj1 && pjo && logistik && vendor1) {
+    const boq1 = await prisma.bOQItem.create({ data: { projectId: prj1.id, code: '1.1', description: 'Pekerjaan Tanah', unit: 'm3', quantity: 1500, unitPrice: 50000, weight: 15, category: 'CIVIL' } });
+    const boq2 = await prisma.bOQItem.create({ data: { projectId: prj1.id, code: '1.2', description: 'Struktur Baja', unit: 'ton', quantity: 200, unitPrice: 25000000, weight: 45, category: 'MECHANICAL' } });
+    const boq3 = await prisma.bOQItem.create({ data: { projectId: prj1.id, code: '1.3', description: 'Instalasi Pipa', unit: 'm', quantity: 5000, unitPrice: 150000, weight: 40, category: 'PIPING' } });
+
+    await prisma.sCurveBaseline.createMany({
+      data: [
+        { projectId: prj1.id, week: 1, planned: 5, date: new Date('2024-01-22') },
+        { projectId: prj1.id, week: 2, planned: 12, date: new Date('2024-01-29') },
+        { projectId: prj1.id, week: 3, planned: 25, date: new Date('2024-02-05') },
+        { projectId: prj1.id, week: 4, planned: 40, date: new Date('2024-02-12') },
+        { projectId: prj1.id, week: 5, planned: 60, date: new Date('2024-02-19') },
+      ]
+    });
+
+    await prisma.progressItem.createMany({
+      data: [
+        { projectId: prj1.id, boqItemId: boq1.id, progressPct: 100, reportDate: new Date('2024-01-22'), inputBy: pjo.id },
+        { projectId: prj1.id, boqItemId: boq2.id, progressPct: 20, reportDate: new Date('2024-01-29'), inputBy: pjo.id },
+        { projectId: prj1.id, boqItemId: boq2.id, progressPct: 50, reportDate: new Date('2024-02-05'), inputBy: pjo.id },
+        { projectId: prj1.id, boqItemId: boq3.id, progressPct: 10, reportDate: new Date('2024-02-12'), inputBy: pjo.id },
+      ]
+    });
+
+    // ─── LOGISTICS & ANTI-MARKUP DATA ────────────────────────────────
+    console.log('Creating Logistics Data...');
+    
+    // Price Reference Master
+    await prisma.priceReference.createMany({
+      data: [
+        { itemCode: 'MAT-001', description: 'Semen Portland 50kg', unit: 'Sak', refPrice: 65000 },
+        { itemCode: 'MAT-002', description: 'Besi Beton Ulir D16', unit: 'Btg', refPrice: 145000 },
+        { itemCode: 'MAT-003', description: 'Pasir Cor', unit: 'm3', refPrice: 285000 },
+        { itemCode: 'MAT-004', description: 'Solar Industri', unit: 'Liter', refPrice: 16500 },
+      ]
+    });
+
+    // Material Request
+    const mr = await prisma.materialRequest.create({
+      data: {
+        mrNumber: 'MR-2024-001',
+        projectId: prj1.id,
+        requestedBy: pjo.id,
+        status: 'PO_CREATED',
+        priority: 'HIGH',
+        notes: 'Segera butuh untuk pengecoran pilar utama'
+      }
+    });
+
+    await prisma.mRItem.createMany({
+      data: [
+        { mrId: mr.id, description: 'Semen Portland 50kg', unit: 'Sak', quantity: 100 },
+        { mrId: mr.id, description: 'Besi Beton Ulir D16', unit: 'Btg', quantity: 500 },
+      ]
+    });
+
+    // Purchase Order
+    const po = await prisma.purchaseOrder.create({
+      data: {
+        poNumber: 'PO-2024-001',
+        projectId: prj1.id,
+        vendorId: vendor1.id,
+        mrId: mr.id,
+        status: 'SENT',
+        totalAmount: 79000000,
+        notes: 'Kirim ke Site Tabalong'
+      }
+    });
+
+    await prisma.pOItem.createMany({
+      data: [
+        { poId: po.id, description: 'Semen Portland 50kg', unit: 'Sak', quantity: 100, unitPrice: 65000, totalPrice: 6500000 },
+        { poId: po.id, description: 'Besi Beton Ulir D16', unit: 'Btg', quantity: 500, unitPrice: 145000, totalPrice: 72500000 },
+      ]
+    });
+
+    // Site Purchase (Anti-Markup Example)
+    // 1. Normal purchase (No markup)
+    await prisma.sitePurchase.create({
+      data: {
+        projectId: prj1.id,
+        purchaseDate: new Date('2024-02-15'),
+        description: 'Solar Industri (Darurat Genset)',
+        vendor: 'Toko Maju Tabalong',
+        unit: 'Liter',
+        quantity: 100,
+        unitPrice: 17000, // Slightly higher than 16500, but < 10%
+        totalAmount: 1700000,
+        refPrice: 16500,
+        priceFlag: false,
+        status: 'APPROVED',
+      }
+    });
+
+    // 2. Markup purchase (Flagged!)
+    const flaggedSp = await prisma.sitePurchase.create({
+      data: {
+        projectId: prj1.id,
+        purchaseDate: new Date('2024-02-16'),
+        description: 'Semen Portland 50kg (Tambahan mendadak)',
+        vendor: 'Toko Material XYZ',
+        unit: 'Sak',
+        quantity: 20,
+        unitPrice: 85000, // Ref is 65000, so this is +30.7% markup
+        totalAmount: 1700000,
+        refPrice: 65000,
+        priceFlag: true,
+        flagPct: 30.76,
+        status: 'PENDING',
+        notes: 'Harga di toko ini jauh lebih mahal'
+      }
+    });
+
+    await prisma.purchaseFlag.create({
+      data: {
+        sitePurchaseId: flaggedSp.id,
+        flaggedBy: logistik.id, // System flagged it, or logistik flagged it
+        reason: 'Sistem Deteksi Otomatis: Harga pembelian melebihi ambang batas wajar (+10%). Harga referensi: Rp 65.000',
+      }
+    });
+
+    // ─── HR & PAYROLL DATA ───────────────────────────────────────────
+    console.log('Seeding HR & Payroll...');
+    const userHRD = await prisma.user.findFirst({ where: { role: 'HRD' } });
+    const proj1 = prj1;
+    const userPJO = pjo;
+
+    const emp1 = await prisma.employee.create({
+      data: {
+        employeeNo: 'EMP-001',
+        name: 'Agus Tukang',
+        nik: '3201010101010001',
+        position: 'Tukang Besi',
+        department: 'Proyek',
+        employeeType: 'HARIAN',
+        baseSalary: 150000,
+        joinDate: new Date('2023-01-10'),
+        projects: {
+          create: {
+            projectId: proj1.id,
+            startDate: new Date('2024-01-01'),
+            role: 'Tukang Besi Utama'
+          }
+        }
+      }
+    });
+
+    const emp2 = await prisma.employee.create({
+      data: {
+        employeeNo: 'EMP-002',
+        name: 'Budi Mandor',
+        nik: '3201010101010002',
+        position: 'Mandor',
+        department: 'Proyek',
+        employeeType: 'STAFF',
+        baseSalary: 6000000,
+        joinDate: new Date('2022-05-15'),
+        projects: {
+          create: {
+            projectId: proj1.id,
+            startDate: new Date('2024-01-01'),
+            role: 'Mandor Proyek'
+          }
+        }
+      }
+    });
+
+    // Attendance for Emp1
+    await prisma.attendance.create({
+      data: {
+        employeeId: emp1.id,
+        date: new Date(),
+        status: 'HADIR',
+        overtime: 2,
+        enteredBy: userPJO.id,
+        notes: 'Lembur cor'
+      }
+    });
+
+    // Draft Payroll
+    const payroll = await prisma.payroll.create({
+      data: {
+        projectId: proj1.id,
+        period: '2024-02',
+        periodStart: new Date('2024-02-01'),
+        periodEnd: new Date('2024-02-28'),
+        totalAmount: 6150000,
+        status: 'HRD_APPROVED',
+        items: {
+          create: [
+            {
+              employeeId: emp1.id,
+              workDays: 20,
+              overtime: 10,
+              baseSalary: 150000,
+              overtimePay: 200000,
+              allowances: 0,
+              deductions: 0,
+              bpjsPay: 0,
+              netSalary: (20 * 150000) + 200000
+            },
+            {
+              employeeId: emp2.id,
+              workDays: 24,
+              overtime: 0,
+              baseSalary: 6000000,
+              overtimePay: 0,
+              allowances: 500000,
+              deductions: 0,
+              bpjsPay: 100000,
+              netSalary: 6000000 + 500000 - 100000
+            }
+          ]
+        },
+        approvals: {
+          create: [
+            {
+              approvedBy: userHRD.id,
+              role: 'HRD',
+              action: 'APPROVED',
+              notes: 'Absensi sesuai rekap.'
+            }
+          ]
+        }
+      }
+    });
+
+    console.log('✅ HR & Payroll seeded.');
+  }
 
   console.log('\n✅ Seed selesai!');
   console.log('\n📋 Akun Demo:');
