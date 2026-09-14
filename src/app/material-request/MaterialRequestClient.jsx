@@ -1,12 +1,55 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Package, Plus, CheckCircle, Clock, XCircle, FileText } from 'lucide-react';
 
 export default function MaterialRequestClient({ requests, projects, user }) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('list');
   const [selectedProject, setSelectedProject] = useState(projects[0]?.id || '');
   const [items, setItems] = useState([{ description: '', unit: '', quantity: '' }]);
+  const [priority, setPriority] = useState('NORMAL');
+  const [notes, setNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    // Validate items
+    const validItems = items.filter(i => i.description.trim() !== '' && i.quantity > 0);
+    if (validItems.length === 0) {
+      alert('Minimal masukkan 1 item yang valid.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        projectId: selectedProject,
+        priority,
+        notes,
+        items: validItems,
+        requestedBy: user.id
+      };
+      const res = await fetch('/api/material-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Gagal membuat MR');
+      }
+      alert('Material Request berhasil diajukan!');
+      setActiveTab('list');
+      setItems([{ description: '', unit: '', quantity: '' }]);
+      setNotes('');
+      router.refresh();
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -101,7 +144,7 @@ export default function MaterialRequestClient({ requests, projects, user }) {
               </div>
               <div className="form-group">
                 <label className="form-label required">Prioritas</label>
-                <select className="form-input form-select">
+                <select className="form-input form-select" value={priority} onChange={e => setPriority(e.target.value)}>
                   <option value="NORMAL">NORMAL</option>
                   <option value="HIGH">HIGH</option>
                   <option value="URGENT">URGENT</option>
@@ -146,12 +189,14 @@ export default function MaterialRequestClient({ requests, projects, user }) {
 
             <div className="form-group">
               <label className="form-label">Catatan / Keterangan</label>
-              <textarea className="form-input" rows="3" placeholder="Catatan tambahan untuk tim logistik..."></textarea>
+              <textarea className="form-input" rows="3" placeholder="Catatan tambahan untuk tim logistik..." value={notes} onChange={e => setNotes(e.target.value)}></textarea>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 24 }}>
               <button className="btn btn-outline" onClick={() => setActiveTab('list')}>Batal</button>
-              <button className="btn btn-primary">Ajukan MR</button>
+              <button className="btn btn-primary" onClick={handleSubmit} disabled={isSubmitting}>
+                {isSubmitting ? 'Mengajukan...' : 'Ajukan MR'}
+              </button>
             </div>
           </div>
         </div>

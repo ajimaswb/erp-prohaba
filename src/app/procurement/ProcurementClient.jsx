@@ -1,11 +1,88 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ShoppingCart, Plus, CheckCircle, Clock, Truck, FileText, FileSignature, Info } from 'lucide-react';
 
 export default function ProcurementClient({ purchaseOrders, materialRequests, vendors, user }) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('list');
   const [selectedMR, setSelectedMR] = useState(materialRequests[0] || null);
+  const [selectedVendor, setSelectedVendor] = useState('');
+  const [deliveryNotes, setDeliveryNotes] = useState('');
+  const [poItems, setPoItems] = useState(
+    materialRequests[0] ? materialRequests[0].items.map(item => ({ ...item, unitPrice: 0 })) : []
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleMRChange = (mrId) => {
+    const mr = materialRequests.find(m => m.id === mrId);
+    setSelectedMR(mr);
+    if (mr) {
+      setPoItems(mr.items.map(item => ({ ...item, unitPrice: 0 })));
+    } else {
+      setPoItems([]);
+    }
+  };
+
+  const handlePriceChange = (index, price) => {
+    const newItems = [...poItems];
+    newItems[index].unitPrice = parseFloat(price) || 0;
+    setPoItems(newItems);
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedMR || !selectedVendor) {
+      alert('Pilih MR dan Vendor terlebih dahulu');
+      return;
+    }
+    
+    // Check if any unit price is 0
+    if (poItems.some(i => i.unitPrice <= 0)) {
+      alert('Semua item harus memiliki estimasi harga satuan lebih dari 0.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        mrId: selectedMR.id,
+        projectId: selectedMR.projectId,
+        vendorId: selectedVendor,
+        deliveryNotes,
+        issuedBy: user.id,
+        items: poItems.map(item => ({
+          description: item.description,
+          unit: item.unit,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice
+        }))
+      };
+
+      const res = await fetch('/api/procurement', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Gagal menerbitkan PO');
+      }
+
+      alert('Purchase Order berhasil diterbitkan!');
+      setActiveTab('list');
+      setSelectedMR(null);
+      setSelectedVendor('');
+      setDeliveryNotes('');
+      setPoItems([]);
+      router.refresh();
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amount);
@@ -91,11 +168,8 @@ export default function ProcurementClient({ purchaseOrders, materialRequests, ve
             <div className="form-grid" style={{ marginBottom: 20 }}>
               <div className="form-group">
                 <label className="form-label required">Sumber MR</label>
-                <select className="form-input form-select" onChange={e => {
-                  const mr = materialRequests.find(m => m.id === e.target.value);
-                  setSelectedMR(mr);
-                }}>
-                  {materialRequests.length === 0 && <option>-- Tidak ada MR siap proses --</option>}
+                <select className="form-input form-select" value={selectedMR?.id || ''} onChange={e => handleMRChange(e.target.value)}>
+                  {materialRequests.length === 0 && <option value="">-- Tidak ada MR siap proses --</option>}
                   {materialRequests.map(mr => (
                     <option key={mr.id} value={mr.id}>{mr.mrNumber} - {mr.project.code}</option>
                   ))}
@@ -103,7 +177,7 @@ export default function ProcurementClient({ purchaseOrders, materialRequests, ve
               </div>
               <div className="form-group">
                 <label className="form-label required">Pilih Vendor</label>
-                <select className="form-input form-select">
+                <select className="form-input form-select" value={selectedVendor} onChange={e => setSelectedVendor(e.target.value)}>
                   <option value="">-- Pilih Vendor --</option>
                   {vendors.map(v => (
                     <option key={v.id} value={v.id}>{v.name} ({v.code})</option>
@@ -127,13 +201,25 @@ export default function ProcurementClient({ purchaseOrders, materialRequests, ve
                       </tr>
                     </thead>
                     <tbody>
-                      {selectedMR.items.map((item, index) => (
+                      {poItems.map((item, index) => (
                         <tr key={index}>
                           <td style={{ fontWeight: 500 }}>{item.description}</td>
                           <td>{item.unit}</td>
                           <td style={{ fontWeight: 600 }}>{item.quantity}</td>
-                          <td><input type="number" className="form-input" placeholder="Rp..." /></td>
-                          <td><span style={{ fontWeight: 600, color: 'var(--gray-500)' }}>Rp 0</span></td>
+                          <td>
+                            <input 
+                              type="number" 
+                              className="form-input" 
+                              placeholder="Rp..." 
+                              value={item.unitPrice || ''}
+                              onChange={e => handlePriceChange(index, e.target.value)}
+                            />
+                          </td>
+                          <td>
+                            <span style={{ fontWeight: 600, color: 'var(--gray-500)' }}>
+                              {formatCurrency(item.quantity * item.unitPrice)}
+                            </span>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -144,14 +230,14 @@ export default function ProcurementClient({ purchaseOrders, materialRequests, ve
 
             <div className="form-group">
               <label className="form-label">Catatan Pengiriman</label>
-              <textarea className="form-input" rows="3" placeholder="Alamat site, kontak penerima, instruksi khusus..."></textarea>
+              <textarea className="form-input" rows="3" placeholder="Alamat site, kontak penerima, instruksi khusus..." value={deliveryNotes} onChange={e => setDeliveryNotes(e.target.value)}></textarea>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 24 }}>
               <button className="btn btn-outline" onClick={() => setActiveTab('list')}>Batal</button>
-              <button className="btn btn-primary" disabled={materialRequests.length === 0}>
+              <button className="btn btn-primary" onClick={handleSubmit} disabled={materialRequests.length === 0 || isSubmitting}>
                 <ShoppingCart size={16} className="inline-block mr-2" />
-                Terbitkan PO
+                {isSubmitting ? 'Menerbitkan...' : 'Terbitkan PO'}
               </button>
             </div>
           </div>
