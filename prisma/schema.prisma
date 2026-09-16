@@ -275,7 +275,8 @@ model JournalVoucher {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  items JournalVoucherItem[]
+  items        JournalVoucherItem[]
+  salesInvoice SalesInvoice?
 }
 
 model JournalVoucherItem {
@@ -329,20 +330,34 @@ model PurchasePayment {
 }
 
 model SalesInvoice {
-  id          String    @id @default(cuid())
-  invoiceNo   String    @unique
-  projectId   String
-  description String
-  amount      Float
-  date        DateTime
-  dueDate     DateTime?
-  category    String // TERMIN | PROGRESS_BILLING | DP | RETENTION_RELEASE
-  status      String    @default("UNPAID") // UNPAID | PAID | PARTIAL
-  notes       String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id               String    @id @default(cuid())
+  invoiceNo        String    @unique
+  projectId        String
+  description      String
+  
+  // Nominal & Pajak
+  subTotal         Float     @default(0)
+  taxRate          Float     @default(11) // PPN 11%
+  taxAmount        Float     @default(0)
+  totalAmount      Float     @default(0)
 
-  project Project @relation(fields: [projectId], references: [id])
+  date             DateTime
+  dueDate          DateTime?
+  category         String // TERMIN | PROGRESS_BILLING | DP | RETENTION_RELEASE
+  status           String    @default("UNPAID") // UNPAID | PAID | PARTIAL
+  
+  // Relasi Akuntansi
+  journalVoucherId String?   @unique
+  downPaymentId    String?   // Merujuk ke ID faktur DP yang dipotong
+
+  notes            String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  project        Project         @relation(fields: [projectId], references: [id])
+  journalVoucher JournalVoucher? @relation(fields: [journalVoucherId], references: [id])
+  downPayment    SalesInvoice?   @relation("DownPayment", fields: [downPaymentId], references: [id])
+  deductedBy     SalesInvoice[]  @relation("DownPayment")
 }
 
 // ─── HR & PAYROLL ─────────────────────────────────────────────────────────────

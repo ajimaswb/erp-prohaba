@@ -1,15 +1,31 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import AppLayout from '@/components/AppLayout';
+import { prisma } from '@/lib/prisma';
+import RevenueClient from './RevenueClient';
 
-import { Banknote } from 'lucide-react';
 
 export default async function RevenuePage() {
   const session = await auth();
   if (!session) redirect('/login');
+  
+  // Ambil data project dan invoices
+  const projects = await prisma.project.findMany({
+    select: { id: true, name: true, client: true },
+    orderBy: { createdAt: 'desc' }
+  });
+  
+  const invoices = await prisma.salesInvoice.findMany({
+    include: {
+      project: true,
+      journalVoucher: true
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+
   return (
-    <AppLayout title="Pendapatan" subtitle="Pencatatan termin & progress billing" user={session.user}>
-      <div className="card"><div className="card-body"><div className="empty-state"><Banknote size={48} className="empty-state-icon" /><h3>Modul Pendapatan</h3><p>Pencatatan termin, progress billing, DP dan release retensi per proyek. Fase 2.</p></div></div></div>
+    <AppLayout title="Pendapatan" subtitle="Manajemen penagihan, pajak & cetak PDF" user={session.user}>
+      <RevenueClient invoices={invoices} projects={projects} />
     </AppLayout>
   );
 }
