@@ -166,9 +166,9 @@ export default function RevenueClient({ invoices, projects }) {
               <tr>
                 <th>Faktur</th>
                 <th>Proyek</th>
-                <th>Kategori & Deskripsi</th>
-                <th>Subtotal (DP Dipotong)</th>
-                <th>Total (+PPN)</th>
+                <th>Deskripsi</th>
+                <th>Subtotal</th>
+                <th>Total</th>
                 <th style={{ textAlign: 'right' }}>Aksi</th>
               </tr>
             </thead>
@@ -178,7 +178,7 @@ export default function RevenueClient({ invoices, projects }) {
                   <td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: 'var(--gray-500)' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                       <FileText size={32} style={{ color: 'var(--gray-400)' }} />
-                      <p>Belum ada faktur penjualan.</p>
+                      <p>Tidak Ada Data</p>
                     </div>
                   </td>
                 </tr>
@@ -233,7 +233,7 @@ export default function RevenueClient({ invoices, projects }) {
                         className="btn-ghost" 
                         style={{ padding: '8px', borderRadius: '8px', color: 'var(--blue-600)' }}
                         onClick={() => handlePrint(inv)}
-                        title="Cetak Faktur PDF"
+                        title="Cetak"
                       >
                         <Printer size={18} />
                       </button>
@@ -242,7 +242,7 @@ export default function RevenueClient({ invoices, projects }) {
                           className="btn-ghost" 
                           style={{ padding: '8px', borderRadius: '8px', color: 'var(--green-600)' }}
                           onClick={() => handleUpdateStatus(inv.id, 'PAID')}
-                          title="Tandai Lunas"
+                          title="Lunas"
                         >
                           <Check size={18} />
                         </button>
@@ -251,7 +251,7 @@ export default function RevenueClient({ invoices, projects }) {
                         className="btn-ghost" 
                         style={{ padding: '8px', borderRadius: '8px', color: 'var(--red-600)' }}
                         onClick={() => handleDelete(inv.id)}
-                        title="Hapus Faktur"
+                        title="Hapus"
                       >
                         <Trash2 size={18} />
                       </button>
@@ -285,9 +285,7 @@ export default function RevenueClient({ invoices, projects }) {
               <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--gray-100)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--navy-900)' }}>Buat Faktur Penjualan</h3>
-                  <p style={{ fontSize: '13px', color: 'var(--gray-500)', marginTop: '4px' }}>
-                    Faktur akan otomatis memotong uang muka dan membukukan jurnal akuntansi.
-                  </p>
+                  
                 </div>
                 <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gray-400)', padding: '4px' }}>
                   <XCircle size={24} />

@@ -24,7 +24,7 @@ export default async function RevenuePage() {
   });
 
   return (
-    <AppLayout title="Pendapatan" subtitle="Manajemen penagihan, pajak & cetak PDF" user={session.user}>
+    <AppLayout title="Pendapatan" subtitle="Kelola Penagihan" user={session.user}>
       <RevenueClient invoices={invoices} projects={projects} />
     </AppLayout>
   );
