@@ -142,7 +142,7 @@ export default function DocumentsClient({ initialDocuments, projects }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      (* Top Actions *)
+      {/* Top Actions */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ position: 'relative', width: '320px', maxWidth: '100%' }}>
           <Search style={{ width: '20px', height: '20px', position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--gray-400)' }} />
@@ -165,7 +165,7 @@ export default function DocumentsClient({ initialDocuments, projects }) {
         </button>
       </div>
 
-      (* Main Table Card *)
+      {/* Main Table Card */}
       <div className="card" style={{ boxShadow: 'var(--shadow-md)', border: '1px solid var(--gray-200)', borderRadius: '16px', overflow: 'hidden' }}>
         <div className="table-wrapper">
           <table>
@@ -269,7 +269,7 @@ export default function DocumentsClient({ initialDocuments, projects }) {
         </div>
       </div>
 
-      (* Modal Form *)
+      {/* Modal Form */}
       <AnimatePresence>
         {isModalOpen && (
           <motion.div 
