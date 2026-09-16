@@ -1,15 +1,34 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import AppLayout from '@/components/AppLayout';
-
-import { Ruler } from 'lucide-react';
+import { prisma } from '@/lib/prisma';
+import DocumentsClient from './DocumentsClient';
 
 export default async function DocumentsPage() {
   const session = await auth();
   if (!session) redirect('/login');
+  
+  if (session.user.role !== 'TOP_MANAGEMENT' && session.user.role !== 'ENGINEERING' && session.user.role !== 'PJO') {
+    redirect('/');
+  }
+
+  const projects = await prisma.project.findMany({
+    where: { status: { in: ['PLANNING', 'IN_PROGRESS'] } },
+    select: { id: true, code: true, name: true },
+    orderBy: { code: 'asc' }
+  });
+
+  const documents = await prisma.document.findMany({
+    include: {
+      project: { select: { id: true, name: true, code: true } },
+      uploader: { select: { id: true, name: true } }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+
   return (
-    <AppLayout title="Dokumen Engineering" subtitle="Distribusi gambar ke site & workshop" user={session.user}>
-      <div className="card"><div className="card-body"><div className="empty-state"><Ruler size={48} className="empty-state-icon" /><h3>Modul Dokumen Engineering</h3><p>Upload & distribusi blueprint ke Site dan Workshop. Fase 2.</p></div></div></div>
+    <AppLayout title="Dokumen Engineering" subtitle="Manajemen blueprint, spesifikasi, dan laporan" user={session.user}>
+      <DocumentsClient initialDocuments={documents} projects={projects} />
     </AppLayout>
   );
 }
