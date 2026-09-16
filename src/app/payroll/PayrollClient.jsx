@@ -72,7 +72,7 @@ export default function PayrollClient({ payrolls }) {
   }
 
   return (
-    <div className="page-container" style={{ display: 'flex', gap: '24px', flexDirection: 'row', alignItems: 'flex-start' }}>
+    <div style={{ display: 'flex', gap: '24px', flexDirection: 'row', alignItems: 'flex-start', width: '100%' }}>
       
       {/* Sidebar List Payroll */}
       <div style={{ flex: '0 0 350px', display: 'flex', flexDirection: 'column', gap: '16px' }}>

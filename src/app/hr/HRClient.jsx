@@ -72,18 +72,14 @@ export default function HRClient({ employees, attendances }) {
 
   return (
     <motion.div 
-      className="page-container" 
-      style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '32px', width: '100%' }}
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
       {/* Header Section */}
-      <motion.div className="page-header" variants={itemVariants}>
-        <div className="page-header-text">
-          <h1 style={{ fontSize: '28px', fontWeight: 800, background: 'linear-gradient(135deg, var(--navy-800), var(--navy-600))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>HR & Kepegawaian</h1>
-          <p style={{ color: 'var(--gray-500)', fontSize: '15px' }}>Kelola data karyawan dan absensi.</p>
-        </div>
+      <motion.div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-16px' }} variants={itemVariants}>
+        
         <div className="page-header-actions">
           <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '12px', padding: '10px 16px', background: 'white', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--gray-200)' }}>
             <Building style={{ width: '18px', height: '18px', color: 'var(--navy-600)' }} />
