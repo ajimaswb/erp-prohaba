@@ -180,7 +180,7 @@ export default function DocumentsClient({ initialDocuments, projects }) {
               </tr>
             </thead>
             <tbody>
-              {filteredDocs.length --= 0 ? (
+              {filteredDocs.length === 0 ? (
                 <tr>
                   <td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: 'var(--gray-500)' }}>
                     Tidak ada dokumen ditemukan.
