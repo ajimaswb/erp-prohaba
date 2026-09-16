@@ -1314,6 +1314,10 @@ tbody tr:hover {
   color: var(--gray-500);
 }
 
+.sidebar-mobile-overlay {
+  display: none;
+}
+
 /* ─── Responsive ────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
@@ -1327,6 +1331,20 @@ tbody tr:hover {
   }
   .sidebar.open {
     transform: translateX(0);
+  }
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+  .sidebar-mobile-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 95;
   }
   .main-content {
     margin-left: 0;

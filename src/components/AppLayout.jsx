@@ -3,16 +3,28 @@
 import Sidebar from './Sidebar';
 import Header from './Header';
 
+import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AppLayout({ children, title, subtitle, user }) {
   const pathname = usePathname();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   return (
     <div className="app-layout">
-      <Sidebar user={user} />
+      <Sidebar user={user} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+      
+      {/* Mobile overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="sidebar-mobile-overlay"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       <div className="main-content">
-        <Header title={title} subtitle={subtitle} user={user} />
+        <Header title={title} subtitle={subtitle} user={user} onMenuClick={() => setIsSidebarOpen(true)} />
         <main className="page-container">
           <AnimatePresence mode="wait">
             <motion.div

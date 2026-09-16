@@ -64,7 +64,7 @@ const NAV_ITEMS = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, setIsOpen }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const { showConfirm } = useDialog();
@@ -86,7 +86,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       {/* Logo */}
       <div className="sidebar-logo">
         <div className="sidebar-logo-inner">
@@ -117,6 +117,7 @@ export default function Sidebar() {
                     key={item.href}
                     href={item.href}
                     className={`nav-item ${isActive ? 'active' : ''}`}
+                    onClick={() => setIsOpen && setIsOpen(false)}
                   >
                     <Icon size={18} className="nav-icon" />
                     <span>{item.label}</span>

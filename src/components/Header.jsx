@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 
-export default function Header({ title, subtitle }) {
+export default function Header({ title, subtitle, onMenuClick }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const router = useRouter();
   const { data: session } = useSession();
@@ -16,9 +16,22 @@ export default function Header({ title, subtitle }) {
 
   return (
     <header className="header glass-nav">
-      <div className="header-breadcrumb">
-        <div className="header-title">{title}</div>
-        {subtitle && <div className="header-subtitle">{subtitle}</div>}
+      <div className="header-breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <button 
+          className="mobile-menu-btn" 
+          onClick={onMenuClick}
+          style={{ display: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'var(--navy-600)' }}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <div>
+          <div className="header-title">{title}</div>
+          {subtitle && <div className="header-subtitle">{subtitle}</div>}
+        </div>
       </div>
 
       <div className="header-actions">
