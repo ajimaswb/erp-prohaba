@@ -60,6 +60,7 @@ model Project {
   employees        EmployeeProject[]
   scurveBaselines  SCurveBaseline[]
   salesInvoices    SalesInvoice[]
+  fabricationOrders FabricationOrder[]
 }
 
 // ─── S-CURVE & PROGRESS ───────────────────────────────────────────────────────
@@ -124,6 +125,7 @@ model Document {
 
   project  Project @relation(fields: [projectId], references: [id])
   uploader User    @relation(fields: [uploadedBy], references: [id])
+
 }
 
 // ─── MATERIAL REQUEST ─────────────────────────────────────────────────────────
@@ -480,4 +482,52 @@ model AuditLog {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+// ─── WORKSHOP & FABRIKASI ─────────────────────────────────────────────────────
+
+model FabricationOrder {
+  id          String   @id @default(cuid())
+  orderNumber String   @unique // WO-2024-001
+  projectId   String
+  description String
+  status      String   @default("PLANNED") // PLANNED | IN_PROGRESS | COMPLETED | DELIVERED
+  startDate   DateTime?
+  endDate     DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project      Project       @relation(fields: [projectId], references: [id])
+  cuttingLists CuttingList[]
+  deliveries   DeliveryTicket[]
+}
+
+model CuttingList {
+  id                 String   @id @default(cuid())
+  fabricationOrderId String
+  materialName       String   
+  dimensions         String?  
+  quantity           Int      @default(1)
+  status             String   @default("PENDING") // PENDING | CUT | WELDED | FINISHED
+  
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  fabricationOrder FabricationOrder @relation(fields: [fabricationOrderId], references: [id], onDelete: Cascade)
+}
+
+model DeliveryTicket {
+  id                 String   @id @default(cuid())
+  ticketNumber       String   @unique // SJ-2024-001
+  fabricationOrderId String
+  driverName         String?
+  vehicleNumber      String?
+  deliveryDate       DateTime
+  status             String   @default("IN_TRANSIT") // IN_TRANSIT | RECEIVED_AT_SITE
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  fabricationOrder FabricationOrder @relation(fields: [fabricationOrderId], references: [id], onDelete: Cascade)
 }
