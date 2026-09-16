@@ -80,7 +80,7 @@ const PENDING_APPROVALS = [
   { id: 1, type: 'MR', number: 'MR-2024-047', project: 'PRJ-001', requestedBy: 'Ahmad Fauzi', value: null, status: 'Menunggu PJO' },
   { id: 2, type: 'PO', number: 'PO-2024-089', project: 'PRJ-002', requestedBy: 'Logistik', value: 245000000, status: 'Menunggu Finance' },
   { id: 3, type: 'PAYROLL', number: 'PAY-JUN-003', project: 'PRJ-003', requestedBy: 'HRD', value: 387500000, status: 'Menunggu Finance' },
-  { id: 4, type: 'PURCHASE', number: 'SP-2024-012', project: 'PRJ-006', requestedBy: 'Budi Santoso', value: 4500000, status: '<AlertTriangle size={18} className="text-red-500" /> Harga Markup' },
+  { id: 4, type: 'PURCHASE', number: 'SP-2024-012', project: 'PRJ-006', requestedBy: 'Budi Santoso', value: 4500000, status: 'Harga Markup', flagged: true },
 ];
 
 // ─── Formatters ───────────────────────────────────────────────
@@ -371,7 +371,8 @@ export default function DashboardClient({ user }) {
                       {formatIDR(item.value, true)}
                     </div>
                   )}
-                  <div style={{ fontSize: 11, color: item.status.includes('') ? 'var(--red-600)' : 'var(--gray-400)' }}>
+                  <div style={{ fontSize: 11, display: 'flex', alignItems: 'center', gap: 4, color: item.flagged ? 'var(--red-600)' : 'var(--gray-400)' }}>
+                    {item.flagged && <AlertTriangle size={12} style={{ flexShrink: 0 }} />}
                     {item.status}
                   </div>
                 </div>
