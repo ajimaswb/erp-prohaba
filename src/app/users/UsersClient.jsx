@@ -96,7 +96,7 @@ export default function UsersClient({ initialUsers }) {
           <Search style={{ width: '20px', height: '20px', position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--gray-400)' }} />
           <input 
             type="text" 
-            placeholder="Cari nama, email, atau role..." 
+            placeholder="Pencarian Pengguna..." 
             className="form-input"
             style={{ paddingLeft: '44px', borderRadius: '12px', background: 'white', height: '44px' }}
             value={search}
@@ -120,7 +120,7 @@ export default function UsersClient({ initialUsers }) {
             <thead style={{ background: 'var(--gray-50)' }}>
               <tr>
                 <th>Pengguna</th>
-                <th>Hak Akses (Role)</th>
+                <th>Hak Akses</th>
                 <th>Status</th>
                 <th>Bergabung Pada</th>
                 <th style={{ textAlign: 'right' }}>Aksi</th>
@@ -255,7 +255,7 @@ export default function UsersClient({ initialUsers }) {
                     <input 
                       type="password" 
                       className="form-input" 
-                      placeholder={editingId ? 'Kosongkan jika tidak ingin diubah' : 'Buat kata sandi...'}
+                      placeholder={editingId ? 'Abaikan jika tidak diubah' : 'Ketik kata sandi...'}
                       style={{ paddingLeft: '40px', height: '44px', borderRadius: '10px' }}
                       value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})}
                       required={!editingId}
@@ -265,7 +265,7 @@ export default function UsersClient({ initialUsers }) {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                   <div className="form-group">
-                    <label className="form-label required">Hak Akses (Role)</label>
+                    <label className="form-label required">Hak Akses</label>
                     <select 
                       className="form-select" 
                       style={{ height: '44px', borderRadius: '10px', fontWeight: 600 }}
@@ -274,7 +274,7 @@ export default function UsersClient({ initialUsers }) {
                       <option value="TOP_MANAGEMENT">Top Management</option>
                       <option value="HRD">HRD</option>
                       <option value="FINANCE">Finance</option>
-                      <option value="PJO">Penanggung Jawab Ops (PJO)</option>
+                      <option value="PJO">PJO</option>
                       <option value="LOGISTIK">Logistik</option>
                       <option value="ENGINEERING">Engineering</option>
                       <option value="WORKSHOP">Workshop</option>
@@ -289,7 +289,7 @@ export default function UsersClient({ initialUsers }) {
                       value={formData.isActive.toString()} onChange={e => setFormData({...formData, isActive: e.target.value === 'true'})}
                     >
                       <option value="true">Aktif</option>
-                      <option value="false">Non-Aktif (Blokir)</option>
+                      <option value="false">Non-Aktif</option>
                     </select>
                   </div>
                 </div>
