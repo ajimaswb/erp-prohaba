@@ -1,16 +1,22 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import AppLayout from '@/components/AppLayout';
+import AuditLogClient from './AuditLogClient';
 
-import { History } from 'lucide-react';
+export const revalidate = 0;
 
 export default async function AuditLogPage() {
   const session = await auth();
   if (!session) redirect('/login');
-  if (session.user.role !== 'TOP_MANAGEMENT') redirect('/dashboard');
+  
+  // Hanya TOP_MANAGEMENT yang boleh akses
+  if (session.user.role !== 'TOP_MANAGEMENT') {
+    redirect('/dashboard');
+  }
+
   return (
-    <AppLayout title="Audit Log" subtitle="Rekam jejak semua aktivitas sistem" user={session.user}>
-      <div className="card"><div className="card-body"><div className="empty-state"><History size={48} className="empty-state-icon" /><h3>Audit Log</h3><p>Riwayat lengkap semua perubahan data: siapa, apa, kapan. Anti-manipulasi. Fase 3.</p></div></div></div>
+    <AppLayout title="Audit Log" subtitle="Sistem Pelacakan Keamanan & Riwayat Aktivitas" user={session.user}>
+      <AuditLogClient />
     </AppLayout>
   );
 }
