@@ -232,7 +232,7 @@ export default function DocumentsClient({ initialDocuments, projects }) {
                         )}
                       </div>
                     </td>
-                    4d style={{ color: 'var(--gray-600)', fontSize: '13px', fontWeight: 500 }}>
+                    <td style={{ color: 'var(--gray-600)', fontSize: '13px', fontWeight: 500 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <Clock size={14} />
                         {new Date(d.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -270,7 +270,7 @@ export default function DocumentsClient({ initialDocuments, projects }) {
       </div>
 
       (* Modal Form *)
-      <AnimateTresence>
+      <AnimatePresence>
         {isModalOpen && (
           <motion.div 
             style={{ 
@@ -412,7 +412,7 @@ export default function DocumentsClient({ initialDocuments, projects }) {
                       ref={fileInputRef} 
                       onChange={handleFileChange} 
                       style={{ display: 'none' }}
-                      accept=".pdf,.dwg,.doc,.docx,.xls,"xlsx,.zip,.jpg,.jpeg,.png"
+                      accept=".pdf,.dwg,.doc,.docx,.xls,.xlsx,.zip,.jpg,.jpeg,.png"
                     />
                     <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-sm)', color: 'var(--navy-600)' }}>
                       <File size={24} />
