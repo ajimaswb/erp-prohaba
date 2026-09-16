@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Building2, Plus, Calendar, MapPin, Search } from 'lucide-react';
+import { useDialog } from '@/components/DialogProvider';
 
 export default function ProjectsClient({ initialProjects }) {
   const router = useRouter();
   const [projects, setProjects] = useState(initialProjects);
   const [showModal, setShowModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showAlert } = useDialog();
   
   const [formData, setFormData] = useState({
     code: '', name: '', client: '', location: '', contractValue: '', startDate: '', endDate: ''
@@ -32,9 +34,9 @@ export default function ProjectsClient({ initialProjects }) {
       setShowModal(false);
       setFormData({ code: '', name: '', client: '', location: '', contractValue: '', startDate: '', endDate: '' });
       router.refresh();
-      alert('Proyek berhasil ditambahkan!');
+      await showAlert('Proyek berhasil ditambahkan!', 'Sukses');
     } catch (error) {
-      alert(error.message);
+      await showAlert(error.message, 'Error');
     } finally {
       setIsSubmitting(false);
     }

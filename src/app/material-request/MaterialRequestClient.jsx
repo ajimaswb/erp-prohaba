@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Package, Plus, CheckCircle, Clock, XCircle, FileText } from 'lucide-react';
+import { useDialog } from '@/components/DialogProvider';
 
 export default function MaterialRequestClient({ requests, projects, user }) {
   const router = useRouter();
@@ -12,12 +13,14 @@ export default function MaterialRequestClient({ requests, projects, user }) {
   const [priority, setPriority] = useState('NORMAL');
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { showAlert } = useDialog();
 
   const handleSubmit = async () => {
     // Validate items
     const validItems = items.filter(i => i.description.trim() !== '' && i.quantity > 0);
     if (validItems.length === 0) {
-      alert('Minimal masukkan 1 item yang valid.');
+      await showAlert('Minimal masukkan 1 item yang valid.', 'Peringatan');
       return;
     }
 
@@ -39,13 +42,13 @@ export default function MaterialRequestClient({ requests, projects, user }) {
         const error = await res.json();
         throw new Error(error.error || 'Gagal membuat MR');
       }
-      alert('Material Request berhasil diajukan!');
+      await showAlert('Material Request berhasil diajukan!', 'Sukses');
       setActiveTab('list');
       setItems([{ description: '', unit: '', quantity: '' }]);
       setNotes('');
       router.refresh();
     } catch (error) {
-      alert(error.message);
+      await showAlert(error.message, 'Error');
     } finally {
       setIsSubmitting(false);
     }

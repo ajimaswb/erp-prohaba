@@ -6,6 +6,7 @@ import {
   FileText, UploadCloud, Search, Download, Trash2, 
   XCircle, AlertCircle, File, Building, Target, BookOpen, Clock
 } from 'lucide-react'
+import { useDialog } from '@/components/DialogProvider'
 
 export default function DocumentsClient({ initialDocuments, projects }) {
   const [documents, setDocuments] = useState(initialDocuments)
@@ -15,6 +16,7 @@ export default function DocumentsClient({ initialDocuments, projects }) {
   const [errorMsg, setErrorMsg] = useState('')
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef(null)
+  const { showAlert, showConfirm } = useDialog()
   
   // Form State
   const [formData, setFormData] = useState({
@@ -104,7 +106,8 @@ export default function DocumentsClient({ initialDocuments, projects }) {
   }
 
   const handleDelete = async (id) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus dokumen ini?')) return
+    const confirmed = await showConfirm('Apakah Anda yakin ingin menghapus dokumen ini?', 'Konfirmasi');
+    if (!confirmed) return
     
     try {
       const res = await fetch(`/api/documents/${id}`, { method: 'DELETE' })
@@ -114,7 +117,7 @@ export default function DocumentsClient({ initialDocuments, projects }) {
       }
       setDocuments(documents.filter(d => d.id !== id))
     } catch (err) {
-      alert(err.message)
+      await showAlert(err.message, 'Error')
     }
   }
 

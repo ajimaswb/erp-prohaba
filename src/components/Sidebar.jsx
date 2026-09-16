@@ -9,6 +9,7 @@ import {
   DollarSign, Banknote, Users, Calendar,
   CreditCard, UserCog, History, LogOut
 } from 'lucide-react';
+import { useDialog } from './DialogProvider';
 
 
 const ROLE_LABELS = {
@@ -66,6 +67,7 @@ const NAV_ITEMS = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { showConfirm } = useDialog();
   const userRole = session?.user?.role || 'GUEST';
 
   const initials = session?.user?.name
@@ -75,6 +77,13 @@ export default function Sidebar() {
   const hasAccess = (roles) => roles.includes('ALL') || roles.includes(userRole);
 
   if (!session) return null; // Don't render sidebar if not logged in
+
+  const handleLogout = async () => {
+    const confirmed = await showConfirm('Apakah Anda yakin ingin keluar dari aplikasi?');
+    if (confirmed) {
+      signOut({ callbackUrl: '/login' });
+    }
+  };
 
   return (
     <aside className="sidebar">
@@ -133,7 +142,7 @@ export default function Sidebar() {
             </div>
           </div>
           <button 
-            onClick={() => signOut({ callbackUrl: '/login' })}
+            onClick={handleLogout}
             style={{ 
               background: 'transparent', 
               border: 'none', 

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Banknote, Search, Plus, FileText, Check, X, Printer, XCircle, AlertCircle
 } from 'lucide-react';
+import { useDialog } from '@/components/DialogProvider';
 
 export default function RevenueClient({ invoices, projects }) {
   const [search, setSearch] = useState('');
@@ -12,6 +13,8 @@ export default function RevenueClient({ invoices, projects }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [printInvoice, setPrintInvoice] = useState(null);
+  
+  const { showAlert, showConfirm } = useDialog();
 
   const [formData, setFormData] = useState({
     projectId: '',
@@ -78,14 +81,15 @@ export default function RevenueClient({ invoices, projects }) {
       window.location.reload();
     } catch (err) {
       console.error(err);
-      alert('Gagal membuat tagihan. Pastikan data terisi dengan benar.');
+      await showAlert('Gagal membuat tagihan. Pastikan data terisi dengan benar.', 'Error');
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleUpdateStatus = async (id, status) => {
-    if (!confirm(`Tandai tagihan sebagai ${status}?`)) return;
+    const confirmed = await showConfirm(`Tandai tagihan sebagai ${status}?`);
+    if (!confirmed) return;
     try {
       await fetch(`/api/revenue/${id}`, {
         method: 'PATCH',
@@ -99,7 +103,8 @@ export default function RevenueClient({ invoices, projects }) {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Hapus tagihan ini secara permanen beserta jurnalnya?')) return;
+    const confirmed = await showConfirm('Hapus tagihan ini secara permanen beserta jurnalnya?', 'Hapus Permanen');
+    if (!confirmed) return;
     try {
       await fetch(`/api/revenue/${id}`, { method: 'DELETE' });
       window.location.reload();
@@ -253,7 +258,7 @@ export default function RevenueClient({ invoices, projects }) {
                         onClick={() => handleDelete(inv.id)}
                         title="Hapus"
                       >
-                        <Trash2 size={18} />
+                        <AlertCircle size={18} />
                       </button>
                     </div>
                   </td>

@@ -6,6 +6,7 @@ import {
   Wrench, Search, Plus, FileText, Check, X, Printer, 
   XCircle, AlertCircle, Scissors, Truck, ChevronRight
 } from 'lucide-react';
+import { useDialog } from '@/components/DialogProvider';
 
 export default function WorkshopClient({ initialOrders, projects }) {
   const [orders, setOrders] = useState(initialOrders || []);
@@ -21,6 +22,7 @@ export default function WorkshopClient({ initialOrders, projects }) {
   const [isDeliveryModalOpen, setIsDeliveryModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const { showAlert, showConfirm } = useDialog();
 
   // Form Data
   const [orderForm, setOrderForm] = useState({
@@ -60,7 +62,7 @@ export default function WorkshopClient({ initialOrders, projects }) {
       setIsOrderModalOpen(false);
       window.location.reload();
     } catch (err) {
-      alert(err.message);
+      await showAlert(err.message, 'Error');
     } finally {
       setSubmitting(false);
     }
@@ -79,7 +81,7 @@ export default function WorkshopClient({ initialOrders, projects }) {
       setIsCuttingModalOpen(false);
       window.location.reload();
     } catch (err) {
-      alert(err.message);
+      await showAlert(err.message, 'Error');
     } finally {
       setSubmitting(false);
     }
@@ -98,7 +100,7 @@ export default function WorkshopClient({ initialOrders, projects }) {
       setIsDeliveryModalOpen(false);
       window.location.reload();
     } catch (err) {
-      alert(err.message);
+      await showAlert(err.message, 'Error');
     } finally {
       setSubmitting(false);
     }
@@ -113,7 +115,7 @@ export default function WorkshopClient({ initialOrders, projects }) {
       });
       window.location.reload();
     } catch (err) {
-      alert('Gagal memperbarui status');
+      await showAlert('Gagal memperbarui status', 'Error');
     }
   };
 
@@ -126,17 +128,18 @@ export default function WorkshopClient({ initialOrders, projects }) {
       });
       window.location.reload();
     } catch (err) {
-      alert('Gagal memperbarui status');
+      await showAlert('Gagal memperbarui status', 'Error');
     }
   };
 
   const deleteItem = async (type, id) => {
-    if (!confirm('Hapus data ini?')) return;
+    const confirmed = await showConfirm('Hapus data ini?', 'Konfirmasi');
+    if (!confirmed) return;
     try {
       await fetch(`/api/workshop/${type}/${id}`, { method: 'DELETE' });
       window.location.reload();
     } catch (err) {
-      alert('Gagal menghapus');
+      await showAlert('Gagal menghapus', 'Error');
     }
   };
 

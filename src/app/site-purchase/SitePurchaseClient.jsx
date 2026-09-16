@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShoppingBag, AlertTriangle, CheckCircle, ShieldAlert, FileText, Search, Plus, Info } from 'lucide-react';
+import { useDialog } from '@/components/DialogProvider';
 
 export default function SitePurchaseClient({ sitePurchases, projects, projectDict, priceReferences, user }) {
   const router = useRouter();
@@ -10,6 +11,7 @@ export default function SitePurchaseClient({ sitePurchases, projects, projectDic
   const [searchCode, setSearchCode] = useState('');
   const [refPriceFound, setRefPriceFound] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showAlert } = useDialog();
 
   const [formData, setFormData] = useState({
     projectId: projects.length > 0 ? projects[0].id : '',
@@ -57,7 +59,7 @@ export default function SitePurchaseClient({ sitePurchases, projects, projectDic
         throw new Error(error.error || 'Gagal menyimpan transaksi');
       }
 
-      alert('Bukti pembelian berhasil disubmit!');
+      await showAlert('Bukti pembelian berhasil disubmit!', 'Sukses');
       setFormData({
         projectId: projects.length > 0 ? projects[0].id : '',
         purchaseDate: new Date().toISOString().split('T')[0],
@@ -73,7 +75,7 @@ export default function SitePurchaseClient({ sitePurchases, projects, projectDic
       setActiveTab('list');
       router.refresh();
     } catch (error) {
-      alert(error.message);
+      await showAlert(error.message, 'Error');
     } finally {
       setIsSubmitting(false);
     }

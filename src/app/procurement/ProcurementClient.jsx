@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShoppingCart, Plus, CheckCircle, Clock, Truck, FileText, FileSignature, Info } from 'lucide-react';
+import { useDialog } from '@/components/DialogProvider';
 
 export default function ProcurementClient({ purchaseOrders, materialRequests, vendors, user }) {
   const router = useRouter();
@@ -14,6 +15,8 @@ export default function ProcurementClient({ purchaseOrders, materialRequests, ve
     materialRequests[0] ? materialRequests[0].items.map(item => ({ ...item, unitPrice: 0 })) : []
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { showAlert } = useDialog();
 
   const handleMRChange = (mrId) => {
     const mr = materialRequests.find(m => m.id === mrId);
@@ -33,13 +36,13 @@ export default function ProcurementClient({ purchaseOrders, materialRequests, ve
 
   const handleSubmit = async () => {
     if (!selectedMR || !selectedVendor) {
-      alert('Pilih MR dan Vendor');
+      await showAlert('Pilih MR dan Vendor', 'Peringatan');
       return;
     }
     
     // Check if any unit price is 0
     if (poItems.some(i => i.unitPrice <= 0)) {
-      alert('Semua item harus memiliki estimasi harga satuan lebih dari 0.');
+      await showAlert('Semua item harus memiliki estimasi harga satuan lebih dari 0.', 'Peringatan');
       return;
     }
 
@@ -70,7 +73,7 @@ export default function ProcurementClient({ purchaseOrders, materialRequests, ve
         throw new Error(err.error || 'Gagal menerbitkan PO');
       }
 
-      alert('Purchase Order berhasil diterbitkan!');
+      await showAlert('Purchase Order berhasil diterbitkan!', 'Sukses');
       setActiveTab('list');
       setSelectedMR(null);
       setSelectedVendor('');
@@ -78,7 +81,7 @@ export default function ProcurementClient({ purchaseOrders, materialRequests, ve
       setPoItems([]);
       router.refresh();
     } catch (error) {
-      alert(error.message);
+      await showAlert(error.message, 'Error');
     } finally {
       setIsSubmitting(false);
     }

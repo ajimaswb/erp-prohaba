@@ -6,6 +6,7 @@ import {
   Users, UserPlus, Clock, ClipboardCheck, 
   Calendar, CheckCircle, XCircle, Search, Save, MoreVertical, Building
 } from 'lucide-react'
+import { useDialog } from '@/components/DialogProvider';
 
 export default function HRClient({ employees, attendances }) {
   const [activeTab, setActiveTab] = useState('employee') // employee, attendance, input
@@ -18,11 +19,13 @@ export default function HRClient({ employees, attendances }) {
     notes: ''
   })
   const [loading, setLoading] = useState(false)
+  
+  const { showAlert } = useDialog();
 
   const handleSubmit = async () => {
     try {
       if (!formData.employeeId) {
-        alert('Pilih pekerja.')
+        await showAlert('Pilih pekerja.', 'Peringatan')
         return
       }
       setLoading(true)
@@ -33,10 +36,10 @@ export default function HRClient({ employees, attendances }) {
       })
       if (!res.ok) throw new Error('Gagal menyimpan absensi')
       
-      alert('Data absensi berhasil disimpan!')
+      await showAlert('Data absensi berhasil disimpan!', 'Sukses')
       window.location.reload()
     } catch (err) {
-      alert(err.message)
+      await showAlert(err.message, 'Error')
     } finally {
       setLoading(false)
     }

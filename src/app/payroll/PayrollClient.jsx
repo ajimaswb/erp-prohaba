@@ -4,16 +4,20 @@ import React, { useState } from 'react'
 import { 
   Calculator, CheckCircle, Clock, FileText, ChevronRight, DollarSign, Wallet, ArrowRightCircle 
 } from 'lucide-react'
+import { useDialog } from '@/components/DialogProvider';
 
 export default function PayrollClient({ payrolls }) {
   const [selectedPayroll, setSelectedPayroll] = useState(payrolls[0] || null)
   const [loading, setLoading] = useState(false)
+  
+  const { showAlert, showPrompt } = useDialog();
 
   const handleGenerate = async () => {
     try {
-      const projectId = prompt('Masukkan ID Proyek untuk di-generate payrollnya:')
-      const period = prompt('Masukkan Periode (YYYY-MM):')
-      if (!projectId || !period) return
+      const projectId = await showPrompt('Masukkan ID Proyek untuk di-generate payrollnya:');
+      if (!projectId) return;
+      const period = await showPrompt('Masukkan Periode (YYYY-MM):');
+      if (!period) return;
 
       setLoading(true)
       const res = await fetch('/api/payroll/generate', {
@@ -23,10 +27,10 @@ export default function PayrollClient({ payrolls }) {
       })
       if (!res.ok) throw new Error('Gagal generate payroll')
       
-      alert('Payroll berhasil di-generate!')
+      await showAlert('Payroll berhasil di-generate!', 'Sukses');
       window.location.reload()
     } catch (err) {
-      alert(err.message)
+      await showAlert(err.message, 'Error')
     } finally {
       setLoading(false)
     }
@@ -43,10 +47,10 @@ export default function PayrollClient({ payrolls }) {
       })
       if (!res.ok) throw new Error('Aksi gagal')
       
-      alert('Aksi berhasil!')
+      await showAlert('Aksi berhasil!', 'Sukses')
       window.location.reload()
     } catch (err) {
-      alert(err.message)
+      await showAlert(err.message, 'Error')
     } finally {
       setLoading(false)
     }

@@ -8,6 +8,7 @@ import {
 import { 
   AlertTriangle, CheckCircle, TrendingUp, TrendingDown, LayoutDashboard, FileText, Activity 
 } from 'lucide-react';
+import { useDialog } from '@/components/DialogProvider';
 
 // ─── Custom Components ─────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }) => {
@@ -46,6 +47,7 @@ export default function SCurveClient({ user, projects, sCurveBaselines, boqItems
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inputData, setInputData] = useState({});
   const [inputDate, setInputDate] = useState(new Date().toISOString().split('T')[0]);
+  const { showAlert } = useDialog();
 
   // Handle progress input change
   const handleInputChange = (code, field, value) => {
@@ -81,12 +83,12 @@ export default function SCurveClient({ user, projects, sCurveBaselines, boqItems
         });
       }
       
-      alert('Progress berhasil disimpan!');
+      await showAlert('Progress berhasil disimpan!', 'Sukses');
       setInputData({});
       router.refresh();
       setActiveTab('scurve');
     } catch (error) {
-      alert('Gagal menyimpan progress: ' + error.message);
+      await showAlert('Gagal menyimpan progress: ' + error.message, 'Error');
     } finally {
       setIsSubmitting(false);
     }
