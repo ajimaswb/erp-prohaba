@@ -1,9 +1,14 @@
 import { prisma } from '@/lib/prisma'
 import PayrollClient from './PayrollClient'
+import { auth } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import AppLayout from '@/components/AppLayout'
 
 export const revalidate = 0
 
 export default async function PayrollPage() {
+  const session = await auth();
+  if (!session) redirect('/login');
   const payrolls = await prisma.payroll.findMany({
     include: {
       project: true,
@@ -60,6 +65,8 @@ export default async function PayrollPage() {
   }))
 
   return (
-    <PayrollClient payrolls={formattedPayrolls} />
+    <AppLayout title="Payroll" subtitle="Manajemen Gaji & Persetujuan" user={session.user}>
+      <PayrollClient payrolls={formattedPayrolls} />
+    </AppLayout>
   )
 }

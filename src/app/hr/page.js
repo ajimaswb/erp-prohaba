@@ -1,9 +1,14 @@
 import { prisma } from '@/lib/prisma'
 import HRClient from './HRClient'
+import { auth } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+import AppLayout from '@/components/AppLayout'
 
 export const revalidate = 0
 
 export default async function HRPage() {
+  const session = await auth();
+  if (!session) redirect('/login');
   const employees = await prisma.employee.findMany({
     include: {
       projects: {
@@ -46,9 +51,11 @@ export default async function HRPage() {
   }))
 
   return (
-    <HRClient 
-      employees={formattedEmployees} 
-      attendances={formattedAttendances} 
-    />
+    <AppLayout title="HR & Karyawan" subtitle="Manajemen Data Karyawan & Rekap Absensi" user={session.user}>
+      <HRClient 
+        employees={formattedEmployees} 
+        attendances={formattedAttendances} 
+      />
+    </AppLayout>
   )
 }

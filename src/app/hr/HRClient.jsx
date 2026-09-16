@@ -82,7 +82,7 @@ export default function HRClient({ employees, attendances }) {
       <motion.div className="page-header" variants={itemVariants}>
         <div className="page-header-text">
           <h1 style={{ fontSize: '28px', fontWeight: 800, background: 'linear-gradient(135deg, var(--navy-800), var(--navy-600))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>HR & Kepegawaian</h1>
-          <p style={{ color: 'var(--gray-500)', fontSize: '15px' }}>Manajemen data karyawan dan rekap absensi proyek.</p>
+          <p style={{ color: 'var(--gray-500)', fontSize: '15px' }}>Kelola data karyawan dan absensi.</p>
         </div>
         <div className="page-header-actions">
           <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '12px', padding: '10px 16px', background: 'white', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--gray-200)' }}>
@@ -311,7 +311,7 @@ export default function HRClient({ employees, attendances }) {
                     </div>
                     <div>
                       <h2 style={{ fontWeight: 700, color: 'var(--navy-900)', fontSize: '16px' }}>Filter Riwayat Absensi</h2>
-                      <p style={{ fontSize: '13px', color: 'var(--navy-600)', marginTop: '2px' }}>Pilih rentang tanggal untuk melihat laporan.</p>
+                      <p style={{ fontSize: '13px', color: 'var(--navy-600)', marginTop: '2px' }}>Filter riwayat berdasarkan tanggal.</p>
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -380,17 +380,13 @@ export default function HRClient({ employees, attendances }) {
                 transition={{ duration: 0.2 }}
                 style={{ maxWidth: '800px', display: 'flex', flexDirection: 'column', gap: '32px', margin: '0 auto' }}
               >
-                <div style={{ background: 'var(--navy-50)', border: '1px solid var(--navy-100)', borderRadius: '16px', padding: '24px', display: 'flex', gap: '20px', alignItems: 'center' }}>
-                  <div style={{ padding: '16px', background: 'white', color: 'var(--navy-600)', borderRadius: '14px', height: 'fit-content', boxShadow: 'var(--shadow-sm)' }}>
-                    <ClipboardCheck size={32} />
-                  </div>
-                  <div>
-                    <h3 style={{ fontWeight: 800, color: 'var(--navy-900)', fontSize: '20px' }}>Form Input Kehadiran Lapangan</h3>
-                    <p style={{ fontSize: '14.5px', color: 'var(--navy-700)', marginTop: '8px', lineHeight: 1.5, maxWidth: '600px' }}>Gunakan form ini untuk mencatat kehadiran harian pekerja lapangan. Data yang diinput akan otomatis terhubung ke perhitungan Payroll.</p>
-                  </div>
+                                <div className="card" style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px', borderRadius: '16px', border: '1px solid var(--gray-200)', boxShadow: 'var(--shadow-lg)' }}>
+
+                <div style={{ paddingBottom: '16px', borderBottom: '1px solid var(--gray-200)' }}>
+                  <h3 style={{ fontWeight: 700, color: 'var(--navy-900)', fontSize: '18px' }}>Input Kehadiran</h3>
+                  <p style={{ fontSize: '14px', color: 'var(--gray-500)', marginTop: '4px' }}>Catat kehadiran harian pekerja lapangan.</p>
                 </div>
 
-                <div className="card" style={{ padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px', borderRadius: '16px', border: '1px solid var(--gray-200)', boxShadow: 'var(--shadow-lg)' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                     <div className="form-group">
                       <label className="form-label required">Tanggal Pekerjaan</label>

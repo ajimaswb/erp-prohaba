@@ -284,7 +284,7 @@ export default function PayrollClient({ payrolls }) {
             <div className="card-footer" style={{ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
               <p style={{ fontSize: '13px', fontWeight: 500, color: 'var(--gray-500)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--gray-300)' }}></span>
-                Data terintegrasi otomatis dari input absensi PJO.
+                Terintegrasi dari data absensi.
               </p>
               
               <div style={{ display: 'flex', gap: '12px' }}>
@@ -319,7 +319,7 @@ export default function PayrollClient({ payrolls }) {
                 <FileText style={{ width: '40px', height: '40px', color: 'var(--gray-400)' }} />
               </div>
               <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--gray-800)', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>Pilih Data Payroll</h3>
-              <p style={{ fontSize: '14px', color: 'var(--gray-500)', maxWidth: '300px', margin: '0 auto', lineHeight: 1.6 }}>Pilih periode payroll di samping untuk melihat rincian kalkulasi gaji dan status persetujuan.</p>
+              <p style={{ fontSize: '14px', color: 'var(--gray-500)', maxWidth: '300px', margin: '0 auto', lineHeight: 1.6 }}>Pilih periode untuk melihat rincian gaji.</p>
             </div>
           </div>
         )}
