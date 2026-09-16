@@ -22,7 +22,7 @@ export default function HRClient({ employees, attendances }) {
   const handleSubmit = async () => {
     try {
       if (!formData.employeeId) {
-        alert('Pilih pekerja terlebih dahulu!')
+        alert('Pilih pekerja.')
         return
       }
       setLoading(true)
@@ -406,9 +406,9 @@ export default function HRClient({ employees, attendances }) {
                         value={formData.employeeId}
                         onChange={e => setFormData({...formData, employeeId: e.target.value})}
                       >
-                        <option value="">-- Pilih Pekerja Lapangan --</option>
+                        <option value="">Pilih Pekerja</option>
                         {employees.map(e => (
-                          <option key={e.id} value={e.id}>{e.name} ({e.employeeType})</option>
+                          <option key={e.id} value={e.id}>{e.name} </option>
                         ))}
                       </select>
                     </div>
@@ -423,10 +423,10 @@ export default function HRClient({ employees, attendances }) {
                         value={formData.status}
                         onChange={e => setFormData({...formData, status: e.target.value})}
                       >
-                        <option value="HADIR"> Hadir (Bekerja)</option>
-                        <option value="IZIN"> Izin Resmi</option>
+                        <option value="HADIR">Hadir</option>
+                        <option value="IZIN">Izin</option>
                         <option value="SAKIT"> Sakit</option>
-                        <option value="TIDAK_HADIR"> Mangkir / Alpa</option>
+                        <option value="TIDAK_HADIR">Alpa</option>
                       </select>
                     </div>
                     <div className="form-group">
@@ -447,7 +447,7 @@ export default function HRClient({ employees, attendances }) {
                   </div>
 
                   <div className="form-group" style={{ paddingTop: '24px', borderTop: '1px dashed var(--gray-200)' }}>
-                    <label className="form-label">Catatan Pekerjaan / Lembur (Opsional)</label>
+                    <label className="form-label">Catatan</label>
                     <textarea 
                       rows="3" 
                       placeholder="Contoh: Pekerja lembur untuk menyelesaikan pengecoran pilar blok A..." 

@@ -84,7 +84,7 @@ export default function Sidebar() {
           <div className="sidebar-logo-icon">P</div>
           <div className="sidebar-logo-text">
             <div className="sidebar-logo-name">Prohaba Jaya Mandiri</div>
-            <div className="sidebar-logo-sub">Sistem ERP Konstruksi</div>
+            <div className="sidebar-logo-sub">ERP Konstruksi</div>
           </div>
         </div>
       </div>

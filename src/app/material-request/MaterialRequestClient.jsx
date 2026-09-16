@@ -167,7 +167,7 @@ export default function MaterialRequestClient({ requests, projects, user }) {
                   <tbody>
                     {items.map((item, index) => (
                       <tr key={index}>
-                        <td><input type="text" className="form-input" placeholder="Contoh: Semen Portland 50kg" value={item.description} onChange={(e) => { const newItems = [...items]; newItems[index].description = e.target.value; setItems(newItems); }} /></td>
+                        <td><input type="text" className="form-input" placeholder="Semen Portland 50kg" value={item.description} onChange={(e) => { const newItems = [...items]; newItems[index].description = e.target.value; setItems(newItems); }} /></td>
                         <td><input type="text" className="form-input" placeholder="Sak" value={item.unit} onChange={(e) => { const newItems = [...items]; newItems[index].unit = e.target.value; setItems(newItems); }} /></td>
                         <td><input type="number" className="form-input" placeholder="100" value={item.quantity} onChange={(e) => { const newItems = [...items]; newItems[index].quantity = e.target.value; setItems(newItems); }} /></td>
                         <td>

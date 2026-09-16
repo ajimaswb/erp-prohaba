@@ -139,7 +139,7 @@ export default function SitePurchaseClient({ sitePurchases, projects, projectDic
                         {sp.priceFlag ? (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                             <span className="badge badge-danger">
-                              <AlertTriangle size={12} className="mr-1 inline" /> Terindikasi Mark-up (+{sp.flagPct}%)
+                              <AlertTriangle size={12} className="mr-1 inline" /> Terindikasi Mark-up +{sp.flagPct}%
                             </span>
                             {sp.status === 'PENDING' ? (
                               <button className="btn btn-sm btn-outline" style={{ fontSize: 11, padding: '2px 8px' }}>Review</button>
@@ -165,7 +165,7 @@ export default function SitePurchaseClient({ sitePurchases, projects, projectDic
       {activeTab === 'create' && (
         <div className="card">
           <div className="card-header">
-            <div className="card-title">Form Input Pembelian Lapangan (Site Purchase)</div>
+            <div className="card-title">Form Input Site Purchase</div>
           </div>
           <div className="card-body">
             <div className="alert alert-warning">
@@ -187,14 +187,14 @@ export default function SitePurchaseClient({ sitePurchases, projects, projectDic
                   </select>
                 </div>
                 <div className="form-group">
-                  <label className="form-label required">Tanggal Beli (di Nota)</label>
+                  <label className="form-label required">Tanggal Beli</label>
                   <input type="date" className="form-input" required
                     value={formData.purchaseDate} onChange={e => setFormData({...formData, purchaseDate: e.target.value})} />
                 </div>
               </div>
 
               <div className="form-group" style={{ marginTop: 20 }}>
-                <label className="form-label required">Nama Toko / Supplier Lokal</label>
+                <label className="form-label required">Supplier / Toko</label>
                 <input type="text" className="form-input" required placeholder="Toko Material Maju Bersama..."
                   value={formData.vendor} onChange={e => setFormData({...formData, vendor: e.target.value})} />
               </div>
@@ -204,7 +204,7 @@ export default function SitePurchaseClient({ sitePurchases, projects, projectDic
             <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
               <div style={{ flex: 1 }}>
                 <div className="form-group">
-                  <label className="form-label required">Nama Barang (Cek Referensi)</label>
+                  <label className="form-label required">Nama Barang</label>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <input 
                       type="text" 
@@ -249,7 +249,7 @@ export default function SitePurchaseClient({ sitePurchases, projects, projectDic
                         value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})} />
                     </div>
                     <div className="form-group">
-                      <label className="form-label required">Harga Satuan (Nota)</label>
+                      <label className="form-label required">Harga Satuan</label>
                       <input type="number" className="form-input" required placeholder="Rp..."
                         value={formData.unitPrice} onChange={e => setFormData({...formData, unitPrice: e.target.value})} />
                     </div>
@@ -257,14 +257,14 @@ export default function SitePurchaseClient({ sitePurchases, projects, projectDic
               </div>
               
               <div style={{ width: 300, background: 'var(--gray-50)', border: '1px dashed var(--gray-300)', borderRadius: 'var(--radius-md)', padding: 20, textAlign: 'center' }}>
-                <div style={{ marginBottom: 12, color: 'var(--gray-500)' }}>Upload Foto Bon/Nota</div>
+                <div style={{ marginBottom: 12, color: 'var(--gray-500)' }}>Unggah Bukti</div>
                 <ShoppingBag size={32} style={{ margin: '0 auto 12px', color: 'var(--gray-400)' }} />
                 <button className="btn btn-sm btn-outline" style={{ width: '100%' }}>Pilih Foto</button>
               </div>
             </div>
 
               <div className="form-group" style={{ marginTop: 20 }}>
-                <label className="form-label">Keterangan / Alasan Pembelian Mendadak</label>
+                <label className="form-label">Keterangan</label>
                 <textarea className="form-input" rows="2" placeholder="Jelaskan mengapa barang tidak di-request melalui pusat..."
                   value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})}></textarea>
               </div>

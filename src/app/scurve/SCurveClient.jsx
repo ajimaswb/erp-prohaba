@@ -152,7 +152,7 @@ export default function SCurveClient({ user, projects, sCurveBaselines, boqItems
       <div className="card" style={{ marginBottom: 20 }}>
         <div className="card-body" style={{ padding: '12px 16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--gray-700)', flexShrink: 0 }}>Pilih Proyek:</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--gray-700)', flexShrink: 0 }}>Proyek:</span>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {projects.map(p => (
                 <button

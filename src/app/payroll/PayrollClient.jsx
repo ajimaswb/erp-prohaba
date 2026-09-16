@@ -265,9 +265,9 @@ export default function PayrollClient({ payrolls }) {
                         <td style={{ fontWeight: 500, color: 'var(--gray-800)' }}>{formatCurrency(item.baseSalary)}</td>
                         <td>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            {item.allowances > 0 && <span className="badge badge-success" style={{ width: 'fit-content' }}>+ {formatCurrency(item.allowances)} <span style={{ opacity: 0.8, marginLeft: '4px', fontWeight: 500 }}>(Tunjangan)</span></span>}
-                            {item.overtimePay > 0 && <span className="badge badge-success" style={{ width: 'fit-content' }}>+ {formatCurrency(item.overtimePay)} <span style={{ opacity: 0.8, marginLeft: '4px', fontWeight: 500 }}>(Lembur)</span></span>}
-                            {item.deductions > 0 && <span className="badge badge-danger" style={{ width: 'fit-content' }}>- {formatCurrency(item.deductions)} <span style={{ opacity: 0.8, marginLeft: '4px', fontWeight: 500 }}>(Potongan)</span></span>}
+                            {item.allowances > 0 && <span className="badge badge-success" style={{ width: 'fit-content' }}>+ {formatCurrency(item.allowances)} <span style={{ opacity: 0.8, marginLeft: '4px', fontWeight: 500 }}>Tunjangan</span></span>}
+                            {item.overtimePay > 0 && <span className="badge badge-success" style={{ width: 'fit-content' }}>+ {formatCurrency(item.overtimePay)} <span style={{ opacity: 0.8, marginLeft: '4px', fontWeight: 500 }}>Lembur</span></span>}
+                            {item.deductions > 0 && <span className="badge badge-danger" style={{ width: 'fit-content' }}>- {formatCurrency(item.deductions)} <span style={{ opacity: 0.8, marginLeft: '4px', fontWeight: 500 }}>Potongan</span></span>}
                           </div>
                         </td>
                         <td style={{ textAlign: 'right' }}>
@@ -318,7 +318,7 @@ export default function PayrollClient({ payrolls }) {
               <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--gray-200)', margin: '0 auto 20px', boxShadow: 'var(--shadow-sm)' }}>
                 <FileText style={{ width: '40px', height: '40px', color: 'var(--gray-400)' }} />
               </div>
-              <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--gray-800)', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>Pilih Data Payroll</h3>
+              <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--gray-800)', fontFamily: 'var(--font-display)', marginBottom: '8px' }}>Pilih Payroll</h3>
               <p style={{ fontSize: '14px', color: 'var(--gray-500)', maxWidth: '300px', margin: '0 auto', lineHeight: 1.6 }}>Pilih periode untuk melihat rincian gaji.</p>
             </div>
           </div>

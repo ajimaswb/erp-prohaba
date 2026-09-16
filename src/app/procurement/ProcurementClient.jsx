@@ -33,7 +33,7 @@ export default function ProcurementClient({ purchaseOrders, materialRequests, ve
 
   const handleSubmit = async () => {
     if (!selectedMR || !selectedVendor) {
-      alert('Pilih MR dan Vendor terlebih dahulu');
+      alert('Pilih MR dan Vendor');
       return;
     }
     
@@ -162,7 +162,7 @@ export default function ProcurementClient({ purchaseOrders, materialRequests, ve
           <div className="card-body">
             <div className="alert alert-info">
               <Info size={16} style={{ flexShrink: 0 }} />
-              Pilih Material Request (MR) yang sudah disetujui untuk di-convert menjadi Purchase Order (PO).
+              Pilih Material Request yang disetujui untuk konversi menjadi Purchase Order.
             </div>
 
             <div className="form-grid" style={{ marginBottom: 20 }}>
