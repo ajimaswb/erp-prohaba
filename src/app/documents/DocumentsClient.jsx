@@ -148,7 +148,7 @@ export default function DocumentsClient({ initialDocuments, projects }) {
           <Search style={{ width: '20px', height: '20px', position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--gray-400)' }} />
           <input 
             type="text" 
-            placeholder="Pencarian Dokumen (Judul, No, Proyek)..." 
+            placeholder="Cari Dokumen..." 
             className="form-input"
             style={{ paddingLeft: '44px', borderRadius: '12px', background: 'white', height: '44px' }}
             value={search}
@@ -291,7 +291,7 @@ export default function DocumentsClient({ initialDocuments, projects }) {
                 <div>
                   <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--navy-900)' }}>Unggah Dokumen Baru</h3>
                   <p style={{ fontSize: '13px', color: 'var(--gray-500)', marginTop: '4px' }}>
-                    Unggah blueprint atau spesifikasi untuk didistribusikan.
+                    Unggah dokumen teknis untuk didistribusikan ke lokasi kerja.
                   </p>
                 </div>
                 <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gray-400)', padding: '4px' }}>
@@ -314,7 +314,7 @@ export default function DocumentsClient({ initialDocuments, projects }) {
                     value={formData.projectId} onChange={e => setFormData({...formData, projectId: e.target.value})}
                     required
                   >
-                    <option value="" disabled>-- Pilih Proyek --</option>
+                    <option value="" disabled>Pilih Proyek</option>
                     {projects.map(p => (
                       <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
                    ))}
@@ -327,7 +327,7 @@ export default function DocumentsClient({ initialDocuments, projects }) {
                     <input 
                       type="text" required
                       className="form-input" 
-                      placeholder="Misal: DWG-STR-001"
+                      placeholder="DWG-STR-001"
                       style={{ height: '44px', borderRadius: '10px' }}
                       value={formData.docNumber} onChange={e => setFormData({...formData, docNumber: e.target.value})}
                     />
@@ -337,7 +337,7 @@ export default function DocumentsClient({ initialDocuments, projects }) {
                     <input 
                       type="text" required
                       className="form-input" 
-                      placeholder="A, B, C, atau 00"
+                      placeholder="00"
                       style={{ height: '44px', borderRadius: '10px' }}
                       value={formData.revision} onChange={e => setFormData({...formData, revision: e.target.value.toUpperCase()})}
                     />
@@ -349,7 +349,7 @@ export default function DocumentsClient({ initialDocuments, projects }) {
                   <input 
                     type="text" required
                     className="form-input" 
-                    placeholder="Judul / Keterangan Dokumen"
+                    placeholder="Judul Dokumen"
                     style={{ height: '44px', borderRadius: '10px' }}
                     value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})}
                   />
@@ -363,10 +363,10 @@ export default function DocumentsClient({ initialDocuments, projects }) {
                       style={{ height: '44px', borderRadius: '10px', fontWeight: 500 }}
                       value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}
                     >
-                      <option value="DRAWING">Drawing / Blueprint</option>
-                      <option value="SPECIFICATION">Spesifikasi Teknis</option>
-                      <option value="CALCULATION">Kalkulasi Struktur</option>
-                      <option value="REPORT">Laporan / Report</option>
+                      <option value="DRAWING">Blueprint</option>
+                      <option value="SPECIFICATION">Spesifikasi</option>
+                      <option value="CALCULATION">Kalkulasi</option>
+                      <option value="REPORT">Laporan</option>
                     </select>
                   </div>
 
@@ -380,7 +380,7 @@ export default function DocumentsClient({ initialDocuments, projects }) {
                           onChange={() => handleTargetToggle('SITE')}
                           style={{ width: '16px', height: '16px', accentColor: 'var(--navy-600)' }}
                         /> 
-                        Tim Lapangan (SITE)
+                        Tim Lapangan
                       </label>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 500, color: 'var(--gray-700)' }}>
                         <input 
@@ -389,7 +389,7 @@ export default function DocumentsClient({ initialDocuments, projects }) {
                           onChange={() => handleTargetToggle('WORKSHOP')}
                           style={{ width: '16px', height: '16px', accentColor: 'var(--navy-600)' }}
                         /> 
-                        Tim Pabrikasi (WORKSHOP)
+                        Tim Pabrikasi
                       </label>
                     </div>
                   </div>
