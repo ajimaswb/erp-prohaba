@@ -189,10 +189,10 @@ export default function WorkshopClient({ initialOrders, projects }) {
           <Wrench size={16} style={{ display: 'inline', marginRight: '6px' }}/> Surat Perintah Kerja
         </button>
         <button className={`btn-ghost ${activeTab === 'cutting' ? 'active-tab' : ''}`} style={{ fontWeight: activeTab === 'cutting' ? 700 : 500, color: activeTab === 'cutting' ? 'var(--blue-600)' : 'var(--gray-500)', borderBottom: activeTab === 'cutting' ? '2px solid var(--blue-600)' : 'none', padding: '8px 16px', borderRadius: '0' }} onClick={() => setActiveTab('cutting')}>
-          <Scissors size={16} style={{ display: 'inline', marginRight: '6px' }}/> Daftar Potong (Cutting)
+          <Scissors size={16} style={{ display: 'inline', marginRight: '6px' }}/> Daftar Potong
         </button>
         <button className={`btn-ghost ${activeTab === 'delivery' ? 'active-tab' : ''}`} style={{ fontWeight: activeTab === 'delivery' ? 700 : 500, color: activeTab === 'delivery' ? 'var(--blue-600)' : 'var(--gray-500)', borderBottom: activeTab === 'delivery' ? '2px solid var(--blue-600)' : 'none', padding: '8px 16px', borderRadius: '0' }} onClick={() => setActiveTab('delivery')}>
-          <Truck size={16} style={{ display: 'inline', marginRight: '6px' }}/> Pengiriman (SJ)
+          <Truck size={16} style={{ display: 'inline', marginRight: '6px' }}/> Surat Jalan
         </button>
       </div>
 
@@ -297,7 +297,7 @@ export default function WorkshopClient({ initialOrders, projects }) {
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                       {c.status === 'PENDING' && <button className="btn-ghost" style={{ padding: '8px', borderRadius: '8px', color: 'var(--blue-600)' }} onClick={() => updateCuttingStatus(c.id, 'CUT')} title="Tandai Selesai Potong"><Check size={18} /></button>}
                       {c.status === 'CUT' && <button className="btn-ghost" style={{ padding: '8px', borderRadius: '8px', color: 'var(--blue-600)' }} onClick={() => updateCuttingStatus(c.id, 'WELDED')} title="Tandai Selesai Las"><Check size={18} /></button>}
-                      {c.status === 'WELDED' && <button className="btn-ghost" style={{ padding: '8px', borderRadius: '8px', color: 'var(--blue-600)' }} onClick={() => updateCuttingStatus(c.id, 'FINISHED')} title="Selesai (Finished)"><Check size={18} /></button>}
+                      {c.status === 'WELDED' && <button className="btn-ghost" style={{ padding: '8px', borderRadius: '8px', color: 'var(--blue-600)' }} onClick={() => updateCuttingStatus(c.id, 'FINISHED')} title="Selesai"><Check size={18} /></button>}
                       <button className="btn-ghost" style={{ padding: '8px', borderRadius: '8px', color: 'var(--red-600)' }} onClick={() => deleteItem('cutting-list', c.id)} title="Hapus"><X size={18} /></button>
                     </div>
                   </td>

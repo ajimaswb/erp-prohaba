@@ -371,7 +371,7 @@ export default function RevenueClient({ invoices, projects }) {
                     </div>
                   </div>
                   <div className="form-group">
-                    <label className="form-label required">PPN (%)</label>
+                    <label className="form-label required">Tarif PPN</label>
                     <input
                       type="number" min="0" step="0.1" required
                       className="form-input" 
@@ -482,7 +482,7 @@ export default function RevenueClient({ invoices, projects }) {
                 <span>{formatRupiah(printInvoice.subTotal)}</span>
               </div>
               <div className="flex justify-between text-gray-600">
-                <span>PPN ({printInvoice.taxRate}%)</span>
+                <span>PPN</span>
                 <span>{formatRupiah(printInvoice.taxAmount)}</span>
               </div>
               <div className="flex justify-between text-lg font-bold text-gray-900 border-t border-gray-300 pt-3">

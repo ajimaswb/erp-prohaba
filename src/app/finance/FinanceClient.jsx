@@ -79,8 +79,8 @@ export default function FinanceClient({ user, glAccounts = [], purchaseInvoices 
 
       <div className="tabs">
         <button className={`tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}><TrendingUp size={16}/> Profitabilitas Proyek</button>
-        <button className={`tab ${activeTab === 'gl' ? 'active' : ''}`} onClick={() => setActiveTab('gl')}><BookOpen size={16}/> Buku Besar (GL)</button>
-        <button className={`tab ${activeTab === 'ap' ? 'active' : ''}`} onClick={() => setActiveTab('ap')}><FileSpreadsheet size={16}/> Faktur Pembelian (AP)</button>
+        <button className={`tab ${activeTab === 'gl' ? 'active' : ''}`} onClick={() => setActiveTab('gl')}><BookOpen size={16}/> Buku Besar</button>
+        <button className={`tab ${activeTab === 'ap' ? 'active' : ''}`} onClick={() => setActiveTab('ap')}><FileSpreadsheet size={16}/> Faktur Pembelian</button>
         <button className={`tab ${activeTab === 'aging' ? 'active' : ''}`} onClick={() => setActiveTab('aging')}><Clock size={16}/> Aging Schedule</button>
       </div>
 
@@ -141,7 +141,7 @@ export default function FinanceClient({ user, glAccounts = [], purchaseInvoices 
       {activeTab === 'gl' && (
         <div className="card">
           <div className="card-header">
-            <div className="card-title">Buku Besar (Chart of Accounts)</div>
+            <div className="card-title">Chart of Accounts</div>
           </div>
           <div className="table-wrapper" style={{ border: 'none', borderRadius: 0 }}>
             <table>
@@ -176,7 +176,7 @@ export default function FinanceClient({ user, glAccounts = [], purchaseInvoices 
       {activeTab === 'ap' && (
         <div className="card">
           <div className="card-header">
-            <div className="card-title">Faktur Pembelian (Purchase Invoices)</div>
+            <div className="card-title">Purchase Invoices</div>
             <div style={{ display: 'flex', gap: 8 }}>
               <button className="btn btn-primary btn-sm">+ Catat Faktur Baru</button>
             </div>
@@ -188,7 +188,7 @@ export default function FinanceClient({ user, glAccounts = [], purchaseInvoices 
                   <th>No. Faktur</th>
                   <th>Pemasok</th>
                   <th>Proyek</th>
-                  <th>Total (DPP + PPN)</th>
+                  <th>Total Tagihan</th>
                   <th>Jatuh Tempo</th>
                   <th>Sisa Umur</th>
                   <th>Status</th>
@@ -230,7 +230,7 @@ export default function FinanceClient({ user, glAccounts = [], purchaseInvoices 
         <div className="grid-2">
           <div className="card">
             <div className="card-header">
-              <div className="card-title">Aging Schedule (Umur Hutang)</div>
+              <div className="card-title">Aging Schedule</div>
             </div>
             <div className="card-body">
               <div style={{ height: 260, marginBottom: 20 }}>

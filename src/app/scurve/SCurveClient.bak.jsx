@@ -148,7 +148,7 @@ export default function SCurveClient({ user, projects, sCurveBaselines, boqItems
           <div className="kpi-trend flat">Invoice tertagih</div>
         </div>
         <div className="kpi-card yellow">
-          <div className="kpi-label">Progress Bobot (BOQ)</div>
+          <div className="kpi-label">Progress Berbobot</div>
           <div className="kpi-value">{weightedProgress.toFixed(1)}%</div>
           <div className="kpi-trend flat">Weighted average</div>
         </div>
@@ -358,8 +358,8 @@ export default function SCurveClient({ user, projects, sCurveBaselines, boqItems
                   <tr>
                     <th>Kode</th>
                     <th>Uraian Pekerjaan</th>
-                    <th>Progress Lalu (%)</th>
-                    <th>Progress Baru (%)</th>
+                    <th>Progress Sebelumnya</th>
+                    <th>Progress Terbaru</th>
                     <th>Keterangan</th>
                   </tr>
                 </thead>
@@ -410,7 +410,7 @@ export default function SCurveClient({ user, projects, sCurveBaselines, boqItems
                   <FileText size={32} />
                 </div>
                 <div style={{ fontWeight: 600, fontSize: 13.5, color: 'var(--gray-600)' }}>Klik atau drag foto lapangan</div>
-                <div style={{ fontSize: 12, marginTop: 4 }}>JPG, PNG, PDF (maks. 10MB per file)</div>
+                <div style={{ fontSize: 12, marginTop: 4 }}>Format PDF, JPG, PNG. Maksimum 10MB.</div>
               </div>
             </div>
 

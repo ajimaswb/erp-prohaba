@@ -195,8 +195,8 @@ export default function ProcurementClient({ purchaseOrders, materialRequests, ve
                       <tr>
                         <th>Deskripsi Barang</th>
                         <th>Satuan</th>
-                        <th>Kuantitas (MR)</th>
-                        <th>Harga Satuan (Estimasi)</th>
+                        <th>Kuantitas</th>
+                        <th>Estimasi Harga</th>
                         <th>Total Harga</th>
                       </tr>
                     </thead>
@@ -230,7 +230,7 @@ export default function ProcurementClient({ purchaseOrders, materialRequests, ve
 
             <div className="form-group">
               <label className="form-label">Catatan Pengiriman</label>
-              <textarea className="form-input" rows="3" placeholder="Alamat site, kontak penerima, instruksi khusus..." value={deliveryNotes} onChange={e => setDeliveryNotes(e.target.value)}></textarea>
+              <textarea className="form-input" rows="3" placeholder="Catatan pengiriman..." value={deliveryNotes} onChange={e => setDeliveryNotes(e.target.value)}></textarea>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 24 }}>

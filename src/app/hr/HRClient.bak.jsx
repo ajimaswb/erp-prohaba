@@ -329,7 +329,7 @@ export default function HRClient({ employees, attendances }) {
                   </div>
 
                   <div className="space-y-2 pt-4 border-t border-slate-100">
-                    <label className="text-sm font-semibold text-slate-700">Catatan Pekerjaan / Lembur (Opsional)</label>
+                    <label className="text-sm font-semibold text-slate-700">Catatan Pekerjaan</label>
                     <textarea 
                       rows="3" 
                       placeholder="Contoh: Pekerja lembur untuk menyelesaikan pengecoran pilar blok A..." 
