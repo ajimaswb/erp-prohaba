@@ -631,10 +631,10 @@ img {
   background: var(--gray-50);
 }
 
-/* ─── KPI Cards ─────────────────────────────────────────────── */
+/* ─── KPI Cards ────────────────────────────────────────────── */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -1332,6 +1332,7 @@ tbody tr:hover {
 @media (max-width: 1024px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
@@ -1386,6 +1387,26 @@ tbody tr:hover {
   }
   .kpi-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .kpi-card {
+    padding: 14px;
+  }
+  .kpi-icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 8px;
+  }
+  .kpi-value {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+  .kpi-label {
+    font-size: 10px;
+  }
+  .kpi-trend {
+    font-size: 10.5px;
   }
   .page-container {
     padding: 16px;
