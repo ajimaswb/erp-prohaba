@@ -1414,9 +1414,41 @@ tbody tr:hover {
   .kpi-trend {
     font-size: 10.5px;
   }
+
+  /* Tables — horizontal scroll */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  table {
+    min-width: 480px;
+  }
+
+  /* Cards */
+  .card-body {
+    padding: 14px;
+  }
+  .card-header {
+    padding: 12px 14px;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  /* Forms */
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-group {
+    margin-bottom: 12px;
+  }
+
   .page-container {
-    padding: 16px;
-    padding-top: calc(var(--header-height) + 16px);
+    padding: 12px;
+    padding-top: calc(var(--header-height) + 12px);
   }
   .page-header {
     flex-direction: column;
@@ -1426,6 +1458,9 @@ tbody tr:hover {
   .page-header-actions {
     width: 100%;
     flex-wrap: wrap;
+  }
+  .page-header-text h1 {
+    font-size: 18px;
   }
 }
 

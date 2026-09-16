@@ -152,7 +152,18 @@ export default function HRClient({ employees, attendances }) {
       <motion.div className="card" style={{ overflow: 'hidden', boxShadow: 'var(--shadow-md)', border: '1px solid var(--gray-200)', borderRadius: '16px' }} variants={itemVariants}>
         
         {/* Modern Tabs */}
-        <div style={{ display: 'flex', borderBottom: '1px solid var(--gray-200)', background: 'var(--gray-50)', position: 'relative' }}>
+        <div style={{
+          display: 'flex',
+          borderBottom: '1px solid var(--gray-200)',
+          background: 'var(--gray-50)',
+          position: 'relative',
+          overflowX: 'auto',
+          overflowY: 'hidden',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch',
+          flexShrink: 0,
+        }}>
           {[
             { id: 'employee', icon: Users, label: 'Data Karyawan' },
             { id: 'attendance', icon: Calendar, label: 'Rekap Absensi' },
@@ -166,21 +177,23 @@ export default function HRClient({ employees, attendances }) {
                 onClick={() => setActiveTab(tab.id)}
                 style={{
                   position: 'relative',
-                  padding: '16px 24px',
+                  padding: '14px 20px',
                   fontWeight: 600,
-                  fontSize: '14px',
+                  fontSize: '13.5px',
                   color: isActive ? 'var(--navy-800)' : 'var(--gray-500)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px',
+                  gap: '8px',
                   background: 'transparent',
                   border: 'none',
                   cursor: 'pointer',
                   transition: 'all 0.3s ease',
-                  zIndex: 1
+                  zIndex: 1,
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
                 }}
               >
-                <Icon size={18} style={{ color: isActive ? 'var(--orange-500)' : 'var(--gray-400)', transition: 'all 0.3s ease' }} /> 
+                <Icon size={16} style={{ color: isActive ? 'var(--orange-500)' : 'var(--gray-400)', transition: 'all 0.3s ease', flexShrink: 0 }} /> 
                 {tab.label}
                 {isActive && (
                   <motion.div
