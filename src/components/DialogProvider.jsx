@@ -85,74 +85,147 @@ function DialogItem({ dialog, isTop, onClose }) {
   };
 
   const getIcon = () => {
-    if (dialog.type === 'alert') return <AlertCircle size={28} className="text-blue-500" />;
-    if (dialog.type === 'confirm') return <HelpCircle size={28} className="text-orange-500" />;
-    return <FileText size={28} className="text-navy-600" />;
+    if (dialog.type === 'alert') return <AlertCircle size={28} style={{ color: 'var(--blue-500)' }} />;
+    if (dialog.type === 'confirm') return <HelpCircle size={28} style={{ color: 'var(--orange-500)' }} />;
+    return <FileText size={28} style={{ color: 'var(--navy-600)' }} />;
   };
 
   return (
     <div 
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-      style={{ pointerEvents: isTop ? 'auto' : 'none' }}
+      style={{
+        position: 'fixed',
+        top: 0, left: 0, right: 0, bottom: 0,
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '16px',
+        pointerEvents: isTop ? 'auto' : 'none'
+      }}
     >
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
-        className="absolute inset-0 bg-navy-900/40 backdrop-blur-sm"
         onClick={handleCancel}
+        style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.4)',
+          backdropFilter: 'blur(4px)'
+        }}
       />
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
         transition={{ duration: 0.2, type: 'spring', bounce: 0.3 }}
-        className="relative bg-white w-full max-w-md rounded-[20px] shadow-2xl overflow-hidden flex flex-col"
-        style={{ pointerEvents: 'auto' }}
+        style={{
+          position: 'relative',
+          backgroundColor: '#fff',
+          width: '100%',
+          maxWidth: '420px',
+          borderRadius: '20px',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          pointerEvents: 'auto'
+        }}
       >
-        <div className="p-6 pb-4">
-          <div className="flex items-start gap-4 mb-2">
-            <div className="p-3 bg-gray-50 rounded-2xl shrink-0">
+        <div style={{ padding: '24px 24px 16px 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '8px' }}>
+            <div style={{ padding: '12px', backgroundColor: 'var(--gray-50)', borderRadius: '16px', flexShrink: 0 }}>
               {getIcon()}
             </div>
             <div>
-              <h3 className="text-[17px] font-bold text-gray-900 mb-1 leading-tight">{dialog.title}</h3>
-              <p className="text-[14px] text-gray-600 leading-relaxed">{dialog.message}</p>
+              <h3 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--gray-900)', marginBottom: '4px', lineHeight: 1.2 }}>
+                {dialog.title}
+              </h3>
+              <p style={{ fontSize: '14px', color: 'var(--gray-600)', lineHeight: 1.5, margin: 0 }}>
+                {dialog.message}
+              </p>
             </div>
           </div>
           
           {dialog.type === 'prompt' && (
-            <div className="mt-4">
+            <div style={{ marginTop: '16px' }}>
               <input
                 type="text"
                 autoFocus
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-navy-500 focus:border-navy-500 outline-none transition-all text-[15px]"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleConfirm();
                 }}
                 placeholder="Ketik di sini..."
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  backgroundColor: 'var(--gray-50)',
+                  border: '1px solid var(--gray-200)',
+                  borderRadius: '12px',
+                  outline: 'none',
+                  fontSize: '15px',
+                  transition: 'all 0.2s'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'var(--navy-500)';
+                  e.target.style.boxShadow = '0 0 0 2px var(--navy-100)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'var(--gray-200)';
+                  e.target.style.boxShadow = 'none';
+                }}
               />
             </div>
           )}
         </div>
 
-        <div className="p-4 bg-gray-50 flex justify-end gap-2 border-t border-gray-100">
+        <div style={{ padding: '16px 24px', backgroundColor: 'var(--gray-50)', display: 'flex', justifyContent: 'flex-end', gap: '8px', borderTop: '1px solid var(--gray-100)' }}>
           {dialog.type !== 'alert' && (
             <button
               onClick={handleCancel}
-              className="px-5 py-2.5 rounded-xl font-semibold text-gray-600 hover:bg-gray-200 transition-colors text-[14px] flex items-center gap-2"
+              style={{
+                padding: '10px 20px',
+                borderRadius: '12px',
+                fontWeight: 600,
+                color: 'var(--gray-600)',
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '14px',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--gray-200)'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
             >
               Batal
             </button>
           )}
           <button
             onClick={handleConfirm}
-            className={`px-5 py-2.5 rounded-xl font-semibold text-white transition-colors text-[14px] flex items-center gap-2 ${
-              dialog.type === 'confirm' ? 'bg-orange-500 hover:bg-orange-600 shadow-orange-500/20' : 'bg-navy-600 hover:bg-navy-700 shadow-navy-600/20'
-            } shadow-lg hover:shadow-xl hover:-translate-y-[1px] transform duration-200`}
+            style={{
+              padding: '10px 20px',
+              borderRadius: '12px',
+              fontWeight: 600,
+              color: '#fff',
+              backgroundColor: dialog.type === 'confirm' ? 'var(--orange-500)' : 'var(--navy-600)',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '14px',
+              boxShadow: dialog.type === 'confirm' ? '0 4px 14px 0 rgba(249,115,22,0.39)' : '0 4px 14px 0 rgba(15,23,42,0.39)',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'translateY(-1px)';
+              e.target.style.boxShadow = dialog.type === 'confirm' ? '0 6px 20px rgba(249,115,22,0.23)' : '0 6px 20px rgba(15,23,42,0.23)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = dialog.type === 'confirm' ? '0 4px 14px 0 rgba(249,115,22,0.39)' : '0 4px 14px 0 rgba(15,23,42,0.39)';
+            }}
           >
             {dialog.type === 'alert' ? 'Mengerti' : dialog.type === 'prompt' ? 'Konfirmasi' : 'Ya, Lanjutkan'}
           </button>
