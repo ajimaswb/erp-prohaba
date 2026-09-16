@@ -312,10 +312,10 @@ export default function HRClient({ employees, attendances }) {
                       <label className="text-sm font-semibold text-slate-700">Status Kehadiran</label>
                       <div className="relative">
                         <select className="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-slate-50 focus:bg-white transition-all appearance-none cursor-pointer font-medium">
-                          <option value="HADIR">✅ Hadir (Bekerja)</option>
-                          <option value="IZIN">📝 Izin Resmi</option>
-                          <option value="SAKIT">🤒 Sakit</option>
-                          <option value="TIDAK_HADIR">❌ Mangkir / Alpa</option>
+                          <option value="HADIR"> Hadir (Bekerja)</option>
+                          <option value="IZIN"> Izin Resmi</option>
+                          <option value="SAKIT"> Sakit</option>
+                          <option value="TIDAK_HADIR"> Mangkir / Alpa</option>
                         </select>
                       </div>
                     </div>

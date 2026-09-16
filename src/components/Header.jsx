@@ -2,18 +2,20 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 
-export default function Header({ title, subtitle, user }) {
+export default function Header({ title, subtitle }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const router = useRouter();
+  const { data: session } = useSession();
+  const user = session?.user;
 
   const handleSignOut = async () => {
-    const { signOut } = await import('next-auth/react');
     await signOut({ callbackUrl: '/login' });
   };
 
   return (
-    <header className="header">
+    <header className="header glass-nav">
       <div className="header-breadcrumb">
         <div className="header-title">{title}</div>
         {subtitle && <div className="header-subtitle">{subtitle}</div>}

@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 import {
   LayoutDashboard, Building2, LineChart, Ruler,
   Wrench, Package, ShoppingCart, ShoppingBag,
   DollarSign, Banknote, Users, Calendar,
-  CreditCard, UserCog, History
+  CreditCard, UserCog, History, LogOut
 } from 'lucide-react';
 
 
@@ -62,15 +63,18 @@ const NAV_ITEMS = [
   },
 ];
 
-export default function Sidebar({ user }) {
+export default function Sidebar() {
   const pathname = usePathname();
-  const userRole = user?.role || 'TOP_MANAGEMENT';
+  const { data: session } = useSession();
+  const userRole = session?.user?.role || 'GUEST';
 
-  const initials = user?.name
-    ? user.name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
+  const initials = session?.user?.name
+    ? session.user.name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
     : 'U';
 
   const hasAccess = (roles) => roles.includes('ALL') || roles.includes(userRole);
+
+  if (!session) return null; // Don't render sidebar if not logged in
 
   return (
     <aside className="sidebar">
@@ -120,12 +124,31 @@ export default function Sidebar({ user }) {
 
       {/* User Info */}
       <div className="sidebar-footer">
-        <div className="sidebar-user">
-          <div className="user-avatar">{initials}</div>
-          <div className="user-info">
-            <div className="user-name">{user?.name || 'Pengguna'}</div>
-            <div className="user-role">{ROLE_LABELS[userRole] || userRole}</div>
+        <div className="sidebar-user" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div className="user-avatar">{initials}</div>
+            <div className="user-info">
+              <div className="user-name" style={{ fontSize: '13px' }}>{session?.user?.name || 'Pengguna'}</div>
+              <div className="user-role" style={{ fontSize: '11px' }}>{ROLE_LABELS[userRole] || userRole}</div>
+            </div>
           </div>
+          <button 
+            onClick={() => signOut({ callbackUrl: '/login' })}
+            style={{ 
+              background: 'transparent', 
+              border: 'none', 
+              color: 'var(--red-500)', 
+              cursor: 'pointer',
+              padding: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '4px'
+            }}
+            title="Keluar"
+          >
+            <LogOut size={18} />
+          </button>
         </div>
       </div>
     </aside>

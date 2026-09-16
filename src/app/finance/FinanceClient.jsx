@@ -14,7 +14,7 @@ const STATUS_MAP = {
   UNPAID:  { label: 'Belum Bayar', class: 'badge-warning' },
   PARTIAL: { label: 'Sebagian',    class: 'badge-info' },
   PAID:    { label: 'Lunas',       class: 'badge-success' },
-  OVERDUE: { label: '⚠️ Overdue',  class: 'badge-danger' },
+  OVERDUE: { label: ' Overdue',  class: 'badge-danger' },
 };
 
 export default function FinanceClient({ user, glAccounts = [], purchaseInvoices = [], profitData = [] }) {

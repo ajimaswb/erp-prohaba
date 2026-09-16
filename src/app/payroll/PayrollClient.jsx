@@ -7,6 +7,50 @@ import {
 
 export default function PayrollClient({ payrolls }) {
   const [selectedPayroll, setSelectedPayroll] = useState(payrolls[0] || null)
+  const [loading, setLoading] = useState(false)
+
+  const handleGenerate = async () => {
+    try {
+      const projectId = prompt('Masukkan ID Proyek untuk di-generate payrollnya:')
+      const period = prompt('Masukkan Periode (YYYY-MM):')
+      if (!projectId || !period) return
+
+      setLoading(true)
+      const res = await fetch('/api/payroll/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId, period })
+      })
+      if (!res.ok) throw new Error('Gagal generate payroll')
+      
+      alert('Payroll berhasil di-generate!')
+      window.location.reload()
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleAction = async (action) => {
+    try {
+      if (!selectedPayroll) return
+      setLoading(true)
+      const res = await fetch('/api/payroll/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payrollId: selectedPayroll.id, action })
+      })
+      if (!res.ok) throw new Error('Aksi gagal')
+      
+      alert('Aksi berhasil!')
+      window.location.reload()
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const formatCurrency = (val) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val)
@@ -37,7 +81,7 @@ export default function PayrollClient({ payrolls }) {
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 800, color: 'var(--gray-900)' }}>Payroll</h1>
             <p style={{ fontSize: '13px', color: 'var(--gray-500)', marginTop: '4px' }}>Proses & Approval Gaji</p>
           </div>
-          <button className="btn btn-orange" style={{ padding: '10px', borderRadius: '12px' }}>
+          <button className="btn btn-orange" style={{ padding: '10px', borderRadius: '12px' }} onClick={handleGenerate} disabled={loading} title="Generate Payroll">
             <Calculator className="btn-icon" />
           </button>
         </div>
@@ -245,17 +289,22 @@ export default function PayrollClient({ payrolls }) {
               
               <div style={{ display: 'flex', gap: '12px' }}>
                 {selectedPayroll.status === 'DRAFT' && (
-                  <button className="btn btn-primary" style={{ padding: '12px 24px' }}>
+                  <button className="btn btn-primary" style={{ padding: '12px 24px' }} onClick={() => handleAction('SUBMIT')} disabled={loading}>
                     Submit ke HRD <ArrowRightCircle className="btn-icon" />
                   </button>
                 )}
+                {selectedPayroll.status === 'SUBMITTED' && (
+                  <button className="btn btn-primary" style={{ padding: '12px 24px', background: 'linear-gradient(135deg, var(--green-600), var(--green-500))' }} onClick={() => handleAction('HRD_APPROVE')} disabled={loading}>
+                    Setujui (HRD) <ArrowRightCircle className="btn-icon" />
+                  </button>
+                )}
                 {selectedPayroll.status === 'HRD_APPROVED' && (
-                  <button className="btn btn-primary" style={{ padding: '12px 24px', background: 'linear-gradient(135deg, var(--green-600), var(--green-500))' }}>
+                  <button className="btn btn-primary" style={{ padding: '12px 24px', background: 'linear-gradient(135deg, var(--green-600), var(--green-500))' }} onClick={() => handleAction('FINANCE_APPROVE')} disabled={loading}>
                     Setujui (Finance) <ArrowRightCircle className="btn-icon" />
                   </button>
                 )}
                 {selectedPayroll.status === 'FINANCE_APPROVED' && (
-                  <button className="btn" style={{ padding: '12px 24px', background: 'var(--gray-900)', color: 'white' }}>
+                  <button className="btn" style={{ padding: '12px 24px', background: 'var(--gray-900)', color: 'white' }} onClick={() => handleAction('TOP_APPROVE')} disabled={loading}>
                     Setujui & Bayar (Direktur) <ArrowRightCircle className="btn-icon" />
                   </button>
                 )}

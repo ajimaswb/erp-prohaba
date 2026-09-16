@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 
 export async function GET(request) {
   try {
-    console.log('🌱 Seeding database ERP Prohaba Jaya Mandiri via API...');
+    console.log(' Seeding database ERP Prohaba Jaya Mandiri via API...');
 
     // Clean existing data (ignore errors on first run)
     const tables = [

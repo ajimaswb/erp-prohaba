@@ -1,4 +1,5 @@
 import './globals.css';
+import { Providers } from '@/components/Providers';
 
 export const metadata = {
   title: 'ERP Prohaba Jaya Mandiri',
@@ -13,7 +14,11 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
-      <body>{children}</body>
+      <body>
+        <Providers>
+          {children}
+        </Providers>
+      </body>
     </html>
   );
 }

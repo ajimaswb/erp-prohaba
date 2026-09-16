@@ -132,9 +132,9 @@ export default function DashboardClient({ user }) {
   };
 
   const getAlertIcon = (type) => {
-    if (type === 'danger') return '🔴';
-    if (type === 'warning') return '🟡';
-    return '🔵';
+    if (type === 'danger') return '';
+    if (type === 'warning') return '';
+    return '';
   };
 
   const getApprovalBadge = (type) => {
@@ -162,9 +162,9 @@ export default function DashboardClient({ user }) {
             PT. Prohaba Jaya Mandiri — ERP Dashboard
           </div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', display: 'flex', gap: 20 }}>
-            <span>🏗️ {PROJECTS.length} Proyek Aktif</span>
-            <span>📊 Avg. Progress {avgProgress}%</span>
-            <span>💼 Total Kontrak {formatBillions(totalContract)}</span>
+            <span> {PROJECTS.length} Proyek Aktif</span>
+            <span> Avg. Progress {avgProgress}%</span>
+            <span> Total Kontrak {formatBillions(totalContract)}</span>
           </div>
         </div>
       </div>
@@ -281,7 +281,7 @@ export default function DashboardClient({ user }) {
         {/* Project Progress Bar Chart */}
         <div className="card">
           <div className="card-header">
-            <div className="card-title">📊 Progress Fisik per Proyek</div>
+            <div className="card-title"> Progress Fisik per Proyek</div>
             <span className="badge badge-info">Real-time</span>
           </div>
           <div className="card-body" style={{ paddingTop: 8 }}>
@@ -371,7 +371,7 @@ export default function DashboardClient({ user }) {
                       {formatIDR(item.value, true)}
                     </div>
                   )}
-                  <div style={{ fontSize: 11, color: item.status.includes('⚠️') ? 'var(--red-600)' : 'var(--gray-400)' }}>
+                  <div style={{ fontSize: 11, color: item.status.includes('') ? 'var(--red-600)' : 'var(--gray-400)' }}>
                     {item.status}
                   </div>
                 </div>
