@@ -141,8 +141,7 @@ export default function SCurveClient({ projects }) {
 
       if (!res.ok) throw new Error('Gagal menambahkan item BOQ');
       
-      const added = await res.json();
-      setBoqItems(prev => [...prev, added]);
+      await loadData(); // refresh all data including summary
       setNewItem({ code: '', description: '', totalPrice: '' });
       setIsAddingItem(false);
       showAlert('Item berhasil ditambahkan', 'Sukses');
