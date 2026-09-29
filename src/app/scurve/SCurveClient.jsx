@@ -8,7 +8,7 @@ import {
   ResponsiveContainer, ReferenceLine, Area, ComposedChart,
 } from 'recharts';
 import {
-  Upload, FileSpreadsheet, Calendar, BarChart2, Table2,
+  Plus, Upload, FileSpreadsheet, Calendar, BarChart2, Table2,
   CheckCircle, AlertTriangle, TrendingUp, TrendingDown,
   ChevronDown, ChevronRight, Save, RefreshCw, Download, Edit, Trash2,
   Loader2, Info, Activity,
@@ -78,6 +78,8 @@ export default function SCurveClient({ projects }) {
   });
   const [collapsed, setCollapsed] = useState({});
   const [editingItem, setEditingItem] = useState(null);
+  const [isAddingItem, setIsAddingItem] = useState(false);
+  const [newItem, setNewItem] = useState({ code: "", description: "", totalPrice: "" });
   const { showConfirm, showAlert } = typeof useDialog === 'function' ? useDialog() : { showConfirm: async()=>true, showAlert: async()=>{} };
 
   const fileInputRef = useRef();
@@ -112,11 +114,13 @@ export default function SCurveClient({ projects }) {
     const ok = await showConfirm(`Yakin hapus ${item.code} - ${item.description}?`, 'Hapus Item');
     if (!ok) return;
     try {
-      await fetch(`/api/boq/item/${item.id}`, { method: 'DELETE' });
-      setUploadMsg({ type: 'success', text: '\u2705 Item berhasil dihapus' });
+      const res = await fetch(`/api/boq/item/${item.id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Gagal dari server');
+      await showAlert('Item berhasil dihapus', 'Sukses');
+      setUploadMsg(null);
       loadData();
     } catch(e) {
-      setUploadMsg({ type: 'error', text: '\u274C Gagal hapus item' });
+      await showAlert('Gagal hapus item', 'Error');
     }
   };
 
@@ -133,14 +137,15 @@ export default function SCurveClient({ projects }) {
         })
       });
       if (res.ok) {
-        setUploadMsg({ type: 'success', text: '\u2705 Item berhasil diperbarui' });
+        await showAlert('Item berhasil diperbarui', 'Sukses');
         setEditingItem(null);
+        setUploadMsg(null);
         loadData();
       } else {
         throw new Error('Gagal update item');
       }
     } catch(err) {
-      setUploadMsg({ type: 'error', text: '\u274C ${err.message}' });
+      await showAlert(err.message, 'Error');
     }
   };
 
@@ -157,14 +162,14 @@ export default function SCurveClient({ projects }) {
       const res = await fetch('/api/boq/upload', { method: 'POST', body: fd });
       const json = await res.json();
       if (json.success) {
-        setUploadMsg({ type: 'success', text: `✅ ${json.count} item BOQ berhasil diimpor` });
+        setUploadMsg({ type: 'success', text: `${json.count} item BOQ berhasil diimpor` });
         await loadData();
         setActiveTab('schedule');
       } else {
-        setUploadMsg({ type: 'error', text: `❌ ${json.error}` });
+        setUploadMsg({ type: 'error', text: `${json.error}` });
       }
     } catch (err) {
-      setUploadMsg({ type: 'error', text: `❌ ${err.message}` });
+      setUploadMsg({ type: 'error', text: `${err.message}` });
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -185,11 +190,11 @@ export default function SCurveClient({ projects }) {
       });
       const json = await res.json();
       if (json.success) {
-        setUploadMsg({ type: 'success', text: `✅ Jadwal ${json.updated} item tersimpan` });
+        setUploadMsg({ type: 'success', text: `Jadwal ${json.updated} item tersimpan` });
         await loadData();
       }
     } catch (e) {
-      setUploadMsg({ type: 'error', text: `❌ ${e.message}` });
+      setUploadMsg({ type: 'error', text: `${e.message}` });
     } finally {
       setSavingSchedule(false);
     }
@@ -422,8 +427,12 @@ export default function SCurveClient({ projects }) {
               ) : (
                 <>
                   <div style={{ padding:'14px 20px', borderBottom:'1px solid var(--gray-100)', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:12 }}>
-                    <div style={{ fontSize:13, color:'var(--gray-600)' }}>
-                      Atur bulan mulai & selesai per item. Bobot akan didistribusikan linear.
+                    <div style={{ fontSize:13, color:'var(--gray-600)' }}>Atur bulan mulai & selesai per item.</div>
+                    <div style={{ display:'flex', gap:12 }}>
+                      <button className="btn btn-outline" onClick={() => setIsAddingItem(true)} style={{ height:36 }}>
+                        <Plus size={14} style={{ marginRight:6 }} />
+                        Tambah Item
+                      </button>
                     </div>
                     <button className="btn btn-primary" onClick={saveSchedule} disabled={savingSchedule} style={{ height:36 }}>
                       {savingSchedule ? <Loader2 size={14} style={{ animation:'spin 1s linear infinite', marginRight:6 }} /> : <Save size={14} style={{ marginRight:6 }} />}
@@ -562,7 +571,7 @@ export default function SCurveClient({ projects }) {
                                       headers:{'Content-Type':'application/json'},
                                       body: JSON.stringify({ boqItemId: item.id, projectId: selectedProjectId, month: selectedMonth, progressPct: parseFloat(edit.progressPct)||0, costActual: parseFloat(edit.costActual)||0, notes: edit.notes })
                                     });
-                                    setUploadMsg({ type:'success', text:`✅ Realisasi ${item.code} bulan ${fmtMonth(selectedMonth)} tersimpan` });
+                                    setUploadMsg({ type:'success', text:`Realisasi ${item.code} bulan ${fmtMonth(selectedMonth)} tersimpan` });
                                     await loadData();
                                   }}
                                 >
@@ -657,6 +666,32 @@ export default function SCurveClient({ projects }) {
                   <div style={{ display:'flex', justifyContent:'flex-end', gap: 8, marginTop: 12 }}>
                     <button type="button" className="btn btn-outline" onClick={() => setEditingItem(null)}>Batal</button>
                     <button type="submit" className="btn btn-primary">Simpan</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {isAddingItem && (
+            <div style={{ position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(0,0,0,0.5)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <div className="card" style={{ width: 400, padding: 24 }}>
+                <h3 style={{ marginTop:0, color:'var(--navy-800)' }}>Tambah Item Baru</h3>
+                <form onSubmit={saveNewItem} style={{ display:'flex', flexDirection:'column', gap: 12 }}>
+                  <div>
+                    <label style={{ fontSize:12, fontWeight:600 }}>Kode / Nomor</label>
+                    <input type="text" className="form-input" value={newItem.code} onChange={e => setNewItem({...newItem, code: e.target.value})} placeholder="Misal: A.8" required />
+                  </div>
+                  <div>
+                    <label style={{ fontSize:12, fontWeight:600 }}>Uraian Pekerjaan</label>
+                    <textarea className="form-input" rows={3} value={newItem.description} onChange={e => setNewItem({...newItem, description: e.target.value})} placeholder="Deskripsi pekerjaan" required />
+                  </div>
+                  <div>
+                    <label style={{ fontSize:12, fontWeight:600 }}>Total Price (Rp)</label>
+                    <input type="number" className="form-input" value={newItem.totalPrice} onChange={e => setNewItem({...newItem, totalPrice: e.target.value})} placeholder="0" />
+                  </div>
+                  <div style={{ display:'flex', justifyContent:'flex-end', gap: 8, marginTop: 12 }}>
+                    <button type="button" className="btn btn-outline" onClick={() => setIsAddingItem(false)}>Batal</button>
+                    <button type="submit" className="btn btn-primary">Tambahkan</button>
                   </div>
                 </form>
               </div>

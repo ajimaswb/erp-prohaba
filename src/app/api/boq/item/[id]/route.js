@@ -7,7 +7,7 @@ export async function PUT(req, { params }) {
     const session = await auth();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
     const { code, description, totalPrice } = body;
 
@@ -46,7 +46,7 @@ export async function DELETE(req, { params }) {
     const session = await auth();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { id } = params;
+    const { id } = await params;
     await prisma.bOQItem.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
