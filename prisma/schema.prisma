@@ -25,6 +25,7 @@ model User {
   // Relations
   employee            Employee?
   progressInputs      ProgressItem[]
+  boqActuals          BoqActual[]
   attendancesEntered  Attendance[]      @relation("AttendanceEntered")
   attendancesVerified Attendance[]      @relation("AttendanceVerified")
   approvals           PayrollApproval[]
@@ -51,6 +52,7 @@ model Project {
 
   // Relations
   boqItems         BOQItem[]
+  boqActuals       BoqActual[]
   progressItems    ProgressItem[]
   documents        Document[]
   materialRequests MaterialRequest[]
@@ -66,25 +68,59 @@ model Project {
 // ─── S-CURVE & PROGRESS ───────────────────────────────────────────────────────
 
 model BOQItem {
-  id          String @id @default(cuid())
-  projectId   String
-  code        String // e.g. 1.1.1
-  description String
-  unit        String
-  quantity    Float
-  unitPrice   Float
-  weight      Float // bobot % dari total proyek (0–100)
-  category    String // CIVIL | MECHANICAL | ELECTRICAL | OTHER
+  id           String  @id @default(cuid())
+  projectId    String
+  // Hierarki
+  groupCode    String? // "A", "B", "C" — kelompok besar
+  no           String? // "1", "2", "3" — nomor item
+  subNo        String? // "a", "b", "c" — sub item
+  level        Int     @default(1) // 1=group, 2=item, 3=subitem
+  // Identitas
+  code         String  // e.g. "A.1.a"
+  description  String
+  unit         String?
+  quantity     Float?
+  // Harga
+  costMaterial Float?  // harga satuan bahan
+  costLabor    Float?  // harga satuan upah
+  totalMaterial Float? // jumlah bahan
+  totalLabor   Float?  // jumlah upah
+  totalPrice   Float?  // total harga item
+  // Bobot & Jadwal
+  weight       Float?  // bobot % dari total kontrak (auto-hitung)
+  startMonth   String? // "2025-01" (YYYY-MM)
+  endMonth     String? // "2025-06"
+  category     String  @default("GENERAL") // CIVIL | MECHANICAL | ELECTRICAL | GENERAL
+  sortOrder    Int     @default(0)
 
   project  Project        @relation(fields: [projectId], references: [id])
   progress ProgressItem[]
+  actuals  BoqActual[]
+}
+
+model BoqActual {
+  id           String   @id @default(cuid())
+  boqItemId    String
+  projectId    String
+  month        String   // "2025-01"
+  volumeActual Float?
+  costActual   Float?
+  progressPct  Float?   // % progress aktual item ini bulan ini
+  notes        String?
+  inputBy      String
+  createdAt    DateTime @default(now())
+
+  boqItem BOQItem @relation(fields: [boqItemId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id])
+  user    User    @relation(fields: [inputBy], references: [id])
 }
 
 model SCurveBaseline {
   id        String   @id @default(cuid())
   projectId String
-  week      Int // week number from project start
-  planned   Float // cumulative planned % at this week
+  month     String?  // "2025-01" format (optional for backward compat)
+  planned   Float    // cumulative planned % at this month
+  actual    Float?   // cumulative actual % (nullable)
   date      DateTime
 
   project Project @relation(fields: [projectId], references: [id])

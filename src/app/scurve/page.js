@@ -12,35 +12,27 @@ export default async function SCurvePage() {
   const session = await auth();
   if (!session) redirect('/login');
 
-  // Fetch projects that are active
   const projects = await prisma.project.findMany({
-    orderBy: { createdAt: 'desc' }
-  });
-
-  const sCurveBaselines = await prisma.sCurveBaseline.findMany({
-    orderBy: { week: 'asc' }
-  });
-
-  const boqItems = await prisma.bOQItem.findMany({
-    include: {
-      progress: {
-        orderBy: { reportDate: 'asc' }
-      }
+    orderBy: { code: 'asc' },
+    select: {
+      id: true,
+      code: true,
+      name: true,
+      client: true,
+      contractValue: true,
+      startDate: true,
+      endDate: true,
+      status: true,
     }
   });
 
   return (
     <AppLayout
-      title="S-Curve & Progress Lapangan"
-      subtitle="Monitoring progress fisik vs rencana semua proyek"
+      title="S-Curve & Progress"
+      subtitle="Monitoring rencana vs realisasi berbasis BOQ"
       user={session.user}
     >
-      <SCurveClient 
-        user={session.user} 
-        projects={projects} 
-        sCurveBaselines={sCurveBaselines} 
-        boqItems={boqItems} 
-      />
+      <SCurveClient user={session.user} projects={projects} />
     </AppLayout>
   );
 }
