@@ -164,9 +164,9 @@ export default function SCurveClient({ projects }) {
         })
       });
       if (res.ok) {
-        await showAlert('Item berhasil diperbarui', 'Sukses');
         setEditingItem(null);
         setUploadMsg(null);
+        await showAlert('Item berhasil diperbarui', 'Sukses');
         loadData();
       } else {
         throw new Error('Gagal update item');

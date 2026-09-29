@@ -205,6 +205,7 @@ function DialogItem({ dialog, isTop, onClose }) {
             </button>
           )}
           <button
+            autoFocus={dialog.type !== 'prompt'}
             onClick={handleConfirm}
             style={{
               padding: '10px 20px',
