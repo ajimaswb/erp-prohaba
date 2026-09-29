@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useDialog } from '@/components/DialogProvider';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -9,7 +10,7 @@ import {
 import {
   Upload, FileSpreadsheet, Calendar, BarChart2, Table2,
   CheckCircle, AlertTriangle, TrendingUp, TrendingDown,
-  ChevronDown, ChevronRight, Save, RefreshCw, Download,
+  ChevronDown, ChevronRight, Save, RefreshCw, Download, Edit, Trash2,
   Loader2, Info, Activity,
 } from 'lucide-react';
 
@@ -76,6 +77,9 @@ export default function SCurveClient({ projects }) {
     return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   });
   const [collapsed, setCollapsed] = useState({});
+  const [editingItem, setEditingItem] = useState(null);
+  const { showConfirm, showAlert } = typeof useDialog === 'function' ? useDialog() : { showConfirm: async()=>true, showAlert: async()=>{} };
+
   const fileInputRef = useRef();
 
   const selectedProject = projects?.find(p => p.id === selectedProjectId);
@@ -101,6 +105,44 @@ export default function SCurveClient({ projects }) {
   }, [selectedProjectId]);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  
+  // ─── Edit / Delete BOQ Item ────────────────────────────────────
+  const handleDeleteBoqItem = async (item) => {
+    const ok = await showConfirm(`Yakin hapus ${item.code} - ${item.description}?`, 'Hapus Item');
+    if (!ok) return;
+    try {
+      await fetch(`/api/boq/item/${item.id}`, { method: 'DELETE' });
+      setUploadMsg({ type: 'success', text: '\u2705 Item berhasil dihapus' });
+      loadData();
+    } catch(e) {
+      setUploadMsg({ type: 'error', text: '\u274C Gagal hapus item' });
+    }
+  };
+
+  const saveItemEdit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`/api/boq/item/${editingItem.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: editingItem.code,
+          description: editingItem.description,
+          totalPrice: parseFloat(editingItem.totalPrice) || 0
+        })
+      });
+      if (res.ok) {
+        setUploadMsg({ type: 'success', text: '\u2705 Item berhasil diperbarui' });
+        setEditingItem(null);
+        loadData();
+      } else {
+        throw new Error('Gagal update item');
+      }
+    } catch(err) {
+      setUploadMsg({ type: 'error', text: '\u274C ${err.message}' });
+    }
+  };
 
   // ─── Upload BOQ ────────────────────────────────────────────────
   const handleUpload = async (e) => {
@@ -397,6 +439,7 @@ export default function SCurveClient({ projects }) {
                           <th style={{ padding:'10px 12px', textAlign:'center', color:'var(--gray-500)', fontWeight:600, fontSize:11 }}>BOBOT %</th>
                           <th style={{ padding:'10px 12px', textAlign:'center', color:'var(--gray-500)', fontWeight:600, fontSize:11 }}>BULAN MULAI</th>
                           <th style={{ padding:'10px 12px', textAlign:'center', color:'var(--gray-500)', fontWeight:600, fontSize:11 }}>BULAN SELESAI</th>
+                          <th style={{ padding:'10px 12px', textAlign:'center', color:'var(--gray-500)', fontWeight:600, fontSize:11 }}>AKSI</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -429,6 +472,16 @@ export default function SCurveClient({ projects }) {
                                   onChange={e => setScheduleEdits(prev => ({ ...prev, [item.id]: { ...prev[item.id], endMonth: e.target.value } }))}
                                 />
                               )}
+                            </td>
+                            <td style={{ padding:'6px 8px', textAlign:'center' }}>
+                              <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
+                                <button onClick={() => setEditingItem(item)} className="btn btn-sm btn-outline" style={{ padding: 4, height: 26, width: 26, display:'flex', alignItems:'center', justifyContent:'center' }} title="Edit Item">
+                                  <Edit size={12} />
+                                </button>
+                                <button onClick={() => handleDeleteBoqItem(item)} className="btn btn-sm btn-outline" style={{ padding: 4, height: 26, width: 26, color: 'var(--red-500)', borderColor: 'var(--red-200)', display:'flex', alignItems:'center', justifyContent:'center' }} title="Hapus Item">
+                                  <Trash2 size={12} />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -583,7 +636,33 @@ export default function SCurveClient({ projects }) {
               )}
             </motion.div>
           )}
-        </AnimatePresence>
+        
+          {editingItem && (
+            <div style={{ position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(0,0,0,0.5)', zIndex:999, display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <div className="card" style={{ width: 400, padding: 24 }}>
+                <h3 style={{ marginTop:0, color:'var(--navy-800)' }}>Edit Item BOQ</h3>
+                <form onSubmit={saveItemEdit} style={{ display:'flex', flexDirection:'column', gap: 12 }}>
+                  <div>
+                    <label style={{ fontSize:12, fontWeight:600 }}>Kode</label>
+                    <input type="text" className="form-input" value={editingItem.code || ''} onChange={e => setEditingItem({...editingItem, code: e.target.value})} required />
+                  </div>
+                  <div>
+                    <label style={{ fontSize:12, fontWeight:600 }}>Uraian Pekerjaan</label>
+                    <textarea className="form-input" rows={3} value={editingItem.description || ''} onChange={e => setEditingItem({...editingItem, description: e.target.value})} required />
+                  </div>
+                  <div>
+                    <label style={{ fontSize:12, fontWeight:600 }}>Total Price (Rp)</label>
+                    <input type="number" className="form-input" value={editingItem.totalPrice || ''} onChange={e => setEditingItem({...editingItem, totalPrice: e.target.value})} />
+                  </div>
+                  <div style={{ display:'flex', justifyContent:'flex-end', gap: 8, marginTop: 12 }}>
+                    <button type="button" className="btn btn-outline" onClick={() => setEditingItem(null)}>Batal</button>
+                    <button type="submit" className="btn btn-primary">Simpan</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+</AnimatePresence>
       </div>
 
       <style>{`
