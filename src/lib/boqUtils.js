@@ -37,5 +37,5 @@ export async function recalculateSortOrder(projectId) {
     });
   });
 
-  await prisma.(updates);
+  await prisma.$transaction(updates);
 }
