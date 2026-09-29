@@ -124,6 +124,34 @@ export default function SCurveClient({ projects }) {
     }
   };
 
+  
+  const saveNewItem = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('/api/boq/item', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectId: selectedProjectId,
+          code: newItem.code,
+          description: newItem.description,
+          totalPrice: parseFloat(newItem.totalPrice) || 0
+        })
+      });
+
+      if (!res.ok) throw new Error('Gagal menambahkan item BOQ');
+      
+      const added = await res.json();
+      setBoqItems(prev => [...prev, added]);
+      setNewItem({ code: '', description: '', totalPrice: '' });
+      setIsAddingItem(false);
+      showAlert('Item berhasil ditambahkan', 'Sukses');
+    } catch (err) {
+      console.error(err);
+      showAlert(err.message, 'Error');
+    }
+  };
+
   const saveItemEdit = async (e) => {
     e.preventDefault();
     try {
