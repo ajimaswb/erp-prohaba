@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
+import { recalculateSortOrder } from '@/lib/boqUtils';
 
 export async function POST(req) {
   try {
@@ -29,6 +30,7 @@ export async function POST(req) {
       }
     });
 
+    await recalculateSortOrder(projectId);
     return NextResponse.json({ success: true, item: newItem });
   } catch (err) {
     console.error('Create BOQ item error:', err);

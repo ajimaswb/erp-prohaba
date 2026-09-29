@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
+import { recalculateSortOrder } from '@/lib/boqUtils';
 
 export async function PUT(req, { params }) {
   try {
@@ -49,6 +50,7 @@ export async function DELETE(req, { params }) {
     const { id } = await params;
     await prisma.bOQItem.delete({ where: { id } });
 
+    await recalculateSortOrder(item.projectId);
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('Delete BOQ item error:', err);
