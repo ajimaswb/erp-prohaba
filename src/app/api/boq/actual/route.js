@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
+
+
 
 // GET /api/boq/actual?projectId=xxx&month=2025-01
 export async function GET(req) {
@@ -19,7 +20,7 @@ export async function GET(req) {
 
 // POST /api/boq/actual — upsert realisasi bulan
 export async function POST(req) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { boqItemId, projectId, month, volumeActual, costActual, progressPct, notes } = await req.json();
