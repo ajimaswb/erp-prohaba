@@ -22,7 +22,7 @@ export default async function ProjectsPage() {
       subtitle={`${projects.length} proyek aktif`} 
       user={session.user}
     >
-      <ProjectsClient initialProjects={projects} />
+      <ProjectsClient initialProjects={projects} user={session.user} />
     </AppLayout>
   );
 }

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Building2, Plus, Calendar, MapPin, Search, Trash2 } from 'lucide-react';
 import { useDialog } from '@/components/DialogProvider';
 
-export default function ProjectsClient({ initialProjects }) {
+export default function ProjectsClient({ initialProjects, user }) {
   const router = useRouter();
   const [projects, setProjects] = useState(initialProjects);
   const [showModal, setShowModal] = useState(false);
@@ -99,6 +99,7 @@ export default function ProjectsClient({ initialProjects }) {
                   <span className={`badge ${p.status === 'ACTIVE' ? 'badge-success' : 'badge-gray'}`}>
                     {p.status}
                   </span>
+                  {user?.role === 'TOP_MANAGEMENT' && (
                   <button 
                     onClick={(e) => { e.stopPropagation(); handleDeleteProject(p.id, p.code); }}
                     style={{ 
@@ -113,6 +114,7 @@ export default function ProjectsClient({ initialProjects }) {
                   >
                     <Trash2 size={16} />
                   </button>
+                  )}
                 </div>
               </div>
               

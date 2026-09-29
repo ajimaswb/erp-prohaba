@@ -7,6 +7,10 @@ export async function DELETE(req, { params }) {
     const session = await auth();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+    if (session.user.role !== 'TOP_MANAGEMENT') {
+      return NextResponse.json({ error: 'Forbidden: Hak akses ditolak. Hanya TOP_MANAGEMENT yang dapat menghapus proyek.' }, { status: 403 });
+    }
+
     const { id } = params;
     
     // Project dan semua relasinya akan dihapus otomatis karena onDelete: Cascade di schema
