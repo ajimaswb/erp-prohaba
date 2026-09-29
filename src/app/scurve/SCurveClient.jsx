@@ -428,16 +428,16 @@ export default function SCurveClient({ projects }) {
                 <>
                   <div style={{ padding:'14px 20px', borderBottom:'1px solid var(--gray-100)', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:12 }}>
                     <div style={{ fontSize:13, color:'var(--gray-600)' }}>Atur bulan mulai & selesai per item.</div>
-                    <div style={{ display:'flex', gap:12 }}>
+                    <div style={{ display:'flex', gap:12, alignItems:'center' }}>
                       <button className="btn btn-outline" onClick={() => setIsAddingItem(true)} style={{ height:36 }}>
                         <Plus size={14} style={{ marginRight:6 }} />
                         Tambah Item
                       </button>
-                    </div>
-                    <button className="btn btn-primary" onClick={saveSchedule} disabled={savingSchedule} style={{ height:36 }}>
+                      <button className="btn btn-primary" onClick={saveSchedule} disabled={savingSchedule} style={{ height:36 }}>
                       {savingSchedule ? <Loader2 size={14} style={{ animation:'spin 1s linear infinite', marginRight:6 }} /> : <Save size={14} style={{ marginRight:6 }} />}
                       Simpan Jadwal
                     </button>
+                    </div>
                   </div>
                   <div style={{ overflowX:'auto' }}>
                     <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12.5 }}>
