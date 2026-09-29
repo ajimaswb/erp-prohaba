@@ -93,7 +93,7 @@ model BOQItem {
   category     String  @default("GENERAL") // CIVIL | MECHANICAL | ELECTRICAL | GENERAL
   sortOrder    Int     @default(0)
 
-  project  Project        @relation(fields: [projectId], references: [id])
+  project  Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
   progress ProgressItem[]
   actuals  BoqActual[]
 }
@@ -111,7 +111,7 @@ model BoqActual {
   createdAt    DateTime @default(now())
 
   boqItem BOQItem @relation(fields: [boqItemId], references: [id], onDelete: Cascade)
-  project Project @relation(fields: [projectId], references: [id])
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [inputBy], references: [id])
 }
 
@@ -123,7 +123,7 @@ model SCurveBaseline {
   actual    Float?   // cumulative actual % (nullable)
   date      DateTime
 
-  project Project @relation(fields: [projectId], references: [id])
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model ProgressItem {
@@ -137,7 +137,7 @@ model ProgressItem {
   inputBy     String
   createdAt   DateTime @default(now())
 
-  project Project @relation(fields: [projectId], references: [id])
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   boqItem BOQItem @relation(fields: [boqItemId], references: [id])
   user    User    @relation(fields: [inputBy], references: [id])
 }
@@ -159,7 +159,7 @@ model Document {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  project  Project @relation(fields: [projectId], references: [id])
+  project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   uploader User    @relation(fields: [uploadedBy], references: [id])
 
 }
@@ -177,7 +177,7 @@ model MaterialRequest {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  project   Project        @relation(fields: [projectId], references: [id])
+  project   Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
   requester User           @relation(fields: [requestedBy], references: [id])
   items     MRItem[]
   po        PurchaseOrder?
@@ -224,7 +224,7 @@ model PurchaseOrder {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  project         Project          @relation(fields: [projectId], references: [id])
+  project         Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
   vendor          Vendor           @relation(fields: [vendorId], references: [id])
   mr              MaterialRequest? @relation(fields: [mrId], references: [id])
   items           POItem[]
@@ -348,7 +348,7 @@ model PurchaseInvoice {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  project  Project           @relation(fields: [projectId], references: [id])
+  project  Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
   vendor   Vendor            @relation(fields: [vendorId], references: [id])
   po       PurchaseOrder?    @relation(fields: [poId], references: [id])
   payments PurchasePayment[]
@@ -392,7 +392,7 @@ model SalesInvoice {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  project        Project         @relation(fields: [projectId], references: [id])
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
   journalVoucher JournalVoucher? @relation(fields: [journalVoucherId], references: [id])
   downPayment    SalesInvoice?   @relation("DownPayment", fields: [downPaymentId], references: [id])
   deductedBy     SalesInvoice[]  @relation("DownPayment")
@@ -435,7 +435,7 @@ model EmployeeProject {
   role       String
 
   employee Employee @relation(fields: [employeeId], references: [id])
-  project  Project  @relation(fields: [projectId], references: [id])
+  project  Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model Attendance {
@@ -468,7 +468,7 @@ model Payroll {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  project   Project           @relation(fields: [projectId], references: [id])
+  project   Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
   items     PayrollItem[]
   approvals PayrollApproval[]
 }
@@ -534,7 +534,7 @@ model FabricationOrder {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  project      Project       @relation(fields: [projectId], references: [id])
+  project      Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
   cuttingLists CuttingList[]
   deliveries   DeliveryTicket[]
 }

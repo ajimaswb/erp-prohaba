@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Building2, Plus, Calendar, MapPin, Search } from 'lucide-react';
+import { Building2, Plus, Calendar, MapPin, Search, Trash2 } from 'lucide-react';
 import { useDialog } from '@/components/DialogProvider';
 
 export default function ProjectsClient({ initialProjects }) {
@@ -10,7 +10,28 @@ export default function ProjectsClient({ initialProjects }) {
   const [projects, setProjects] = useState(initialProjects);
   const [showModal, setShowModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { showAlert } = useDialog();
+  const { showAlert, showConfirm } = useDialog();
+
+  const handleDeleteProject = async (id, code) => {
+    const confirmed = await showConfirm(
+      `Apakah Anda yakin ingin menghapus permanen proyek ${code}? Semua data terkait (BOQ, Progress, S-Curve, dsb) akan ikut terhapus.`,
+      'Hapus Permanen Proyek'
+    );
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`/api/projects/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Gagal menghapus proyek');
+      }
+      setProjects(prev => prev.filter(p => p.id !== id));
+      await showAlert('Proyek berhasil dihapus.', 'Sukses');
+      router.refresh();
+    } catch (error) {
+      await showAlert(error.message, 'Error');
+    }
+  };
   
   const [formData, setFormData] = useState({
     code: '', name: '', client: '', location: '', contractValue: '', startDate: '', endDate: ''
@@ -74,9 +95,25 @@ export default function ProjectsClient({ initialProjects }) {
                     <div style={{ fontSize: 13, color: 'var(--gray-500)' }}>{p.client}</div>
                   </div>
                 </div>
-                <span className={`badge ${p.status === 'ACTIVE' ? 'badge-success' : 'badge-gray'}`}>
-                  {p.status}
-                </span>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <span className={`badge ${p.status === 'ACTIVE' ? 'badge-success' : 'badge-gray'}`}>
+                    {p.status}
+                  </span>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); handleDeleteProject(p.id, p.code); }}
+                    style={{ 
+                      background: 'none', border: 'none', padding: 6, 
+                      borderRadius: 6, color: 'var(--red-500)', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      backgroundColor: 'var(--red-50)'
+                    }}
+                    title="Hapus Proyek"
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--red-100)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--red-50)'}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
               
               <div style={{ fontWeight: 600, color: 'var(--navy-700)', marginBottom: 16, lineHeight: 1.4 }}>
