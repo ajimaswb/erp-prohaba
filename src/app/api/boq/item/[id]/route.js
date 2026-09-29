@@ -35,6 +35,7 @@ export async function PUT(req, { params }) {
       }
     });
 
+    await recalculateSortOrder(item.projectId);
     return NextResponse.json({ success: true, updated });
   } catch (err) {
     console.error('Update BOQ item error:', err);
@@ -48,6 +49,8 @@ export async function DELETE(req, { params }) {
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { id } = await params;
+    const item = await prisma.bOQItem.findUnique({ where: { id } });
+    if (!item) return NextResponse.json({ error: 'Item not found' }, { status: 404 });
     await prisma.bOQItem.delete({ where: { id } });
 
     await recalculateSortOrder(item.projectId);
