@@ -186,35 +186,33 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
       </div>
 
       {activeTab === 'fuel' && (
-        <div className="grid" style={{ gridTemplateColumns: '1fr 2fr', gap: '24px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {/* Form Input BBM */}
           <div className="card">
             <div className="card-header">
               <div className="card-title">Input Pemakaian BBM</div>
             </div>
             <div className="card-body">
-              <form onSubmit={handleFuelSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div className="form-group">
-                  <label className="form-label required">Kendaraan / Alat Berat</label>
-                  <select className="form-input form-select" value={vehicleId} onChange={e => setVehicleId(e.target.value)}>
-                    <option value="">-- Pilih Kendaraan --</option>
-                    {vehicles.map(v => (
-                      <option key={v.id} value={v.id}>{v.name} ({v.code || v.plateNumber})</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Proyek (Opsional)</label>
-                  <select className="form-input form-select" value={projectId} onChange={e => setProjectId(e.target.value)}>
-                    <option value="">-- Kantor Pusat / Gudang --</option>
-                    {projects.map(p => (
-                      <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <form onSubmit={handleFuelSubmit}>
+                <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '16px' }}>
+                  <div className="form-group">
+                    <label className="form-label required">Kendaraan / Alat Berat</label>
+                    <select className="form-input form-select" value={vehicleId} onChange={e => setVehicleId(e.target.value)}>
+                      <option value="">-- Pilih Kendaraan --</option>
+                      {vehicles.map(v => (
+                        <option key={v.id} value={v.id}>{v.name} ({v.code || v.plateNumber})</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Proyek (Opsional)</label>
+                    <select className="form-input form-select" value={projectId} onChange={e => setProjectId(e.target.value)}>
+                      <option value="">-- Kantor Pusat / Gudang --</option>
+                      {projects.map(p => (
+                        <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
+                      ))}
+                    </select>
+                  </div>
                   <div className="form-group">
                     <label className="form-label required">Jenis BBM</label>
                     <select className="form-input form-select" value={fuelType} onChange={e => setFuelType(e.target.value)}>
@@ -228,25 +226,20 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
                     <label className="form-label required">Jumlah (Liter)</label>
                     <input type="number" className="form-input" value={liters} onChange={e => setLiters(e.target.value)} placeholder="100" />
                   </div>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label required">Total Biaya (Rp)</label>
-                  <input type="number" className="form-input" value={totalCost} onChange={e => setTotalCost(e.target.value)} placeholder="Rp..." />
-                </div>
-
-                <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div className="form-group">
+                    <label className="form-label required">Total Biaya (Rp)</label>
+                    <input type="number" className="form-input" value={totalCost} onChange={e => setTotalCost(e.target.value)} placeholder="Rp..." />
+                  </div>
                   <div className="form-group">
                     <label className="form-label">HM / Odometer</label>
-                    <input type="number" className="form-input" value={meterValue} onChange={e => setMeterValue(e.target.value)} placeholder="Angka km/jam" />
+                    <input type="number" className="form-input" value={meterValue} onChange={e => setMeterValue(e.target.value)} placeholder="Angka km/HM" />
                   </div>
                   <div className="form-group">
                     <label className="form-label">Operator / Supir</label>
                     <input type="text" className="form-input" value={operator} onChange={e => setOperator(e.target.value)} placeholder="Nama..." />
                   </div>
                 </div>
-
-                <button type="submit" className="btn btn-primary" disabled={isSubmitting} style={{ marginTop: '8px' }}>
+                <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
                   <Droplet size={16} className="inline-block mr-2" />
                   Simpan Log BBM
                 </button>
@@ -255,9 +248,10 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
           </div>
 
           {/* Tabel History BBM */}
-          <div className="card">
-            <div className="card-header">
-              <div className="card-title">Riwayat Pemakaian BBM Terakhir</div>
+          <div className="card" style={{ marginTop: '4px' }}>
+            <div className="card-header" style={{ borderBottom: '1px solid var(--gray-100)', paddingBottom: '16px' }}>
+              <div className="card-title">Riwayat Pemakaian BBM</div>
+              <span style={{ fontSize: '12px', color: 'var(--gray-500)' }}>10 entri terakhir dari semua kendaraan</span>
             </div>
             <div className="card-body p-0">
               <table className="table">
@@ -276,7 +270,7 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
                   ) : (
                     fuelLogs.slice(0, 10).map(log => (
                       <tr key={log.id}>
-                        <td style={{ fontSize: '13px' }}>{new Date(log.date).toLocaleDateString('id-ID')}</td>
+                        <td style={{ fontSize: '13px', padding: '14px 16px' }}>{new Date(log.date).toLocaleDateString('id-ID')}</td>
                         <td style={{ fontWeight: 600 }}>{log.vehicle.name} <span style={{ fontSize: '12px', color: 'var(--gray-500)' }}>({log.vehicle.code})</span></td>
                         <td>{log.project?.code || '-'}</td>
                         <td>
@@ -294,87 +288,81 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
       )}
 
       {activeTab === 'maintenance' && (
-        <div className="grid" style={{ gridTemplateColumns: '1fr 2fr', gap: '24px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {/* Form Input Maintenance */}
           <div className="card">
             <div className="card-header">
               <div className="card-title">Input Perawatan & Servis</div>
             </div>
             <div className="card-body">
-              <form onSubmit={handleMaintenanceSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div className="form-group">
-                  <label className="form-label required">Kendaraan / Alat Berat</label>
-                  <select className="form-input form-select" value={mVehId} onChange={e => setMVehId(e.target.value)}>
-                    <option value="">-- Pilih Kendaraan --</option>
-                    {vehicles.map(v => (
-                      <option key={v.id} value={v.id}>{v.name} ({v.code || v.plateNumber})</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Proyek (Opsional)</label>
-                  <select className="form-input form-select" value={mProjId} onChange={e => setMProjId(e.target.value)}>
-                    <option value="">-- Kantor Pusat / Gudang --</option>
-                    {projects.map(p => (
-                      <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label required">Jenis Servis</label>
-                  <select className="form-input form-select" value={mType} onChange={e => setMType(e.target.value)}>
-                    <option value="SERVICE">Servis Rutin</option>
-                    <option value="GANTI_OLI">Ganti Oli</option>
-                    <option value="SPAREPART">Penggantian Sparepart</option>
-                    <option value="REPAIR">Perbaikan / Repair</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label required">Deskripsi / Detail Part</label>
-                  <textarea className="form-input" rows="2" value={mDesc} onChange={e => setMDesc(e.target.value)} placeholder="Misal: Ganti kampas rem, Filter solar..."></textarea>
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label required">Total Biaya (Rp)</label>
-                  <input type="number" className="form-input" value={mCost} onChange={e => setMCost(e.target.value)} placeholder="Rp..." />
-                </div>
-
-                <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <form onSubmit={handleMaintenanceSubmit}>
+                <div className="grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '16px' }}>
+                  <div className="form-group">
+                    <label className="form-label required">Kendaraan / Alat Berat</label>
+                    <select className="form-input form-select" value={mVehId} onChange={e => setMVehId(e.target.value)}>
+                      <option value="">-- Pilih Kendaraan --</option>
+                      {vehicles.map(v => (
+                        <option key={v.id} value={v.id}>{v.name} ({v.code || v.plateNumber})</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Proyek (Opsional)</label>
+                    <select className="form-input form-select" value={mProjId} onChange={e => setMProjId(e.target.value)}>
+                      <option value="">-- Kantor Pusat / Gudang --</option>
+                      {projects.map(p => (
+                        <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label required">Jenis Servis</label>
+                    <select className="form-input form-select" value={mType} onChange={e => setMType(e.target.value)}>
+                      <option value="SERVICE">Servis Rutin</option>
+                      <option value="GANTI_OLI">Ganti Oli</option>
+                      <option value="SPAREPART">Penggantian Sparepart</option>
+                      <option value="REPAIR">Perbaikan / Repair</option>
+                    </select>
+                  </div>
+                  <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                    <label className="form-label required">Deskripsi / Detail Pekerjaan</label>
+                    <input type="text" className="form-input" value={mDesc} onChange={e => setMDesc(e.target.value)} placeholder="Misal: Ganti kampas rem belakang, filter solar..." />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label required">Total Biaya (Rp)</label>
+                    <input type="number" className="form-input" value={mCost} onChange={e => setMCost(e.target.value)} placeholder="Rp..." />
+                  </div>
                   <div className="form-group">
                     <label className="form-label">HM / Odometer</label>
-                    <input type="number" className="form-input" value={mMeter} onChange={e => setMMeter(e.target.value)} placeholder="Angka km/jam" />
+                    <input type="number" className="form-input" value={mMeter} onChange={e => setMMeter(e.target.value)} placeholder="Angka km/HM" />
                   </div>
                   <div className="form-group">
                     <label className="form-label">Mekanik / Bengkel</label>
                     <input type="text" className="form-input" value={mMechanic} onChange={e => setMMechanic(e.target.value)} placeholder="Nama bengkel..." />
                   </div>
+                  {mType === 'SPAREPART' && (
+                    <div className="form-group">
+                      <label className="form-label">Nama Sparepart</label>
+                      <input type="text" className="form-input" value={mPartName} onChange={e => setMPartName(e.target.value)} placeholder="Misal: Filter Solar, Kampas Rem..." />
+                    </div>
+                  )}
                 </div>
 
-                {mType === 'SPAREPART' && (
-                  <div className="form-group">
-                    <label className="form-label">Nama Sparepart</label>
-                    <input type="text" className="form-input" value={mPartName} onChange={e => setMPartName(e.target.value)} placeholder="Misal: Filter Solar, Kampas Rem..." />
-                  </div>
-                )}
-
-                <div style={{ background: 'var(--gray-50)', borderRadius: '10px', padding: '14px', border: '1px dashed var(--gray-200)' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--gray-600)', marginBottom: '10px' }}>Target Servis Berikutnya (untuk tracking)</div>
+                <div style={{ background: 'var(--gray-50)', borderRadius: '10px', padding: '16px', border: '1px dashed var(--gray-200)', marginBottom: '16px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--gray-500)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Target Servis Berikutnya</div>
                   <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    <div className="form-group">
+                    <div className="form-group" style={{ marginBottom: 0 }}>
                       <label className="form-label">Target HM / km</label>
                       <input type="number" className="form-input" value={mNextMeter} onChange={e => setMNextMeter(e.target.value)} placeholder="Misal: 1500 (HM)" />
                     </div>
-                    <div className="form-group">
+                    <div className="form-group" style={{ marginBottom: 0 }}>
                       <label className="form-label">Target Tanggal</label>
                       <input type="date" className="form-input" value={mNextDate} onChange={e => setMNextDate(e.target.value)} />
                     </div>
                   </div>
                 </div>
 
-                <button type="submit" className="btn btn-primary" disabled={isSubmitting} style={{ marginTop: '8px' }}>
+                <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
                   <Wrench size={16} className="inline-block mr-2" />
                   Simpan Data Servis
                 </button>
@@ -383,9 +371,10 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
           </div>
 
           {/* Tabel History Maintenance */}
-          <div className="card">
-            <div className="card-header">
-              <div className="card-title">Riwayat Perawatan Terakhir</div>
+          <div className="card" style={{ marginTop: '4px' }}>
+            <div className="card-header" style={{ borderBottom: '1px solid var(--gray-100)' }}>
+              <div className="card-title">Riwayat Perawatan</div>
+              <span style={{ fontSize: '12px', color: 'var(--gray-500)' }}>10 entri terakhir dari semua kendaraan</span>
             </div>
             <div className="card-body p-0">
               <table className="table">
@@ -404,7 +393,7 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
                   ) : (
                     maintenanceLogs.slice(0, 10).map(log => (
                       <tr key={log.id}>
-                        <td style={{ fontSize: '13px' }}>{new Date(log.date).toLocaleDateString('id-ID')}</td>
+                        <td style={{ fontSize: '13px', padding: '14px 16px' }}>{new Date(log.date).toLocaleDateString('id-ID')}</td>
                         <td style={{ fontWeight: 600 }}>{log.vehicle.name} <span style={{ fontSize: '12px', color: 'var(--gray-500)' }}>({log.vehicle.code})</span></td>
                         <td><span className="badge badge-info">{log.type}</span></td>
                         <td style={{ maxWidth: '200px' }}>
