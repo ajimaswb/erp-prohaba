@@ -10,7 +10,7 @@ export async function POST(req) {
     }
 
     const data = await req.json();
-    const { vehicleId, projectId, type, description, cost, meterValue, mechanic, notes } = data;
+    const { vehicleId, projectId, type, description, cost, meterValue, mechanic, notes, partName, nextServiceMeter, nextServiceDate } = data;
 
     if (!vehicleId || !type || !description || cost === undefined) {
       return NextResponse.json({ error: 'Data wajib (Kendaraan, Jenis Servis, Deskripsi, Biaya) harus diisi' }, { status: 400 });
@@ -27,6 +27,9 @@ export async function POST(req) {
         meterValue: meterValue ? parseFloat(meterValue) : null,
         mechanic,
         notes,
+        partName: partName || null,
+        nextServiceMeter: nextServiceMeter ? parseFloat(nextServiceMeter) : null,
+        nextServiceDate: nextServiceDate ? new Date(nextServiceDate) : null,
         recordedBy: session.user.id
       }
     });

@@ -617,10 +617,13 @@ model MaintenanceLog {
   type        String // SERVICE | GANTI_OLI | SPAREPART | REPAIR
   description String
   cost        Float
-  meterValue  Float? // Odometer or Hour Meter when serviced
-  mechanic    String?
-  notes       String?
-  recordedBy  String
+  meterValue        Float? // Odometer or Hour Meter when serviced
+  mechanic          String?
+  notes             String?
+  nextServiceMeter  Float?    // Target HM/km for next replacement
+  nextServiceDate   DateTime? // Target date for next service (date-based)
+  partName          String?   // Specific part name for SPAREPART type
+  recordedBy        String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

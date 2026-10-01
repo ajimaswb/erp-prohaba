@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Truck, Droplet, Wrench, Plus, History, Info, X } from 'lucide-react';
+import { Truck, Droplet, Wrench, Plus, History, Info, X, BarChart2 } from 'lucide-react';
 import { useDialog } from '@/components/DialogProvider';
+import MonitoringClient from './MonitoringClient';
 
 export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLogs, projects }) {
   const router = useRouter();
@@ -33,6 +34,9 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
   const [mCost, setMCost] = useState('');
   const [mMeter, setMMeter] = useState('');
   const [mMechanic, setMMechanic] = useState('');
+  const [mPartName, setMPartName] = useState('');
+  const [mNextMeter, setMNextMeter] = useState('');
+  const [mNextDate, setMNextDate] = useState('');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showAlert } = useDialog();
@@ -83,7 +87,10 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
           description: mDesc,
           cost: parseFloat(mCost),
           meterValue: mMeter ? parseFloat(mMeter) : null,
-          mechanic: mMechanic
+          mechanic: mMechanic,
+          partName: mPartName || null,
+          nextServiceMeter: mNextMeter ? parseFloat(mNextMeter) : null,
+          nextServiceDate: mNextDate ? new Date(mNextDate).toISOString() : null
         })
       });
 
@@ -98,6 +105,9 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
       setMCost('');
       setMMeter('');
       setMMechanic('');
+      setMPartName('');
+      setMNextMeter('');
+      setMNextDate('');
       router.refresh();
       
     } catch (err) {
@@ -168,6 +178,10 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
         <button className={`tab ${activeTab === 'vehicles' ? 'active' : ''}`} onClick={() => setActiveTab('vehicles')}>
           <Truck size={16} className="inline-block mr-2" />
           Data Kendaraan & Alat Berat
+        </button>
+        <button className={`tab ${activeTab === 'monitoring' ? 'active' : ''}`} onClick={() => setActiveTab('monitoring')}>
+          <BarChart2 size={16} className="inline-block mr-2" />
+          Monitoring per Kendaraan
         </button>
       </div>
 
@@ -339,6 +353,27 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
                   </div>
                 </div>
 
+                {mType === 'SPAREPART' && (
+                  <div className="form-group">
+                    <label className="form-label">Nama Sparepart</label>
+                    <input type="text" className="form-input" value={mPartName} onChange={e => setMPartName(e.target.value)} placeholder="Misal: Filter Solar, Kampas Rem..." />
+                  </div>
+                )}
+
+                <div style={{ background: 'var(--gray-50)', borderRadius: '10px', padding: '14px', border: '1px dashed var(--gray-200)' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--gray-600)', marginBottom: '10px' }}>🔔 Target Servis Berikutnya (untuk tracking)</div>
+                  <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div className="form-group">
+                      <label className="form-label">Target HM / km</label>
+                      <input type="number" className="form-input" value={mNextMeter} onChange={e => setMNextMeter(e.target.value)} placeholder="Misal: 1500 (HM)" />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Target Tanggal</label>
+                      <input type="date" className="form-input" value={mNextDate} onChange={e => setMNextDate(e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+
                 <button type="submit" className="btn btn-primary" disabled={isSubmitting} style={{ marginTop: '8px' }}>
                   <Wrench size={16} className="inline-block mr-2" />
                   Simpan Data Servis
@@ -420,6 +455,10 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
           </div>
         </div>
       )}
+      {activeTab === 'monitoring' && (
+        <MonitoringClient vehicles={vehicles} fuelLogs={fuelLogs} maintenanceLogs={maintenanceLogs} />
+      )}
+
       {/* Vehicle Modal */}
       {isVehicleModalOpen && (
         <div className="modal-overlay">
