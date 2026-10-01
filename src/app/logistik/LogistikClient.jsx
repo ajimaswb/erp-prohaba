@@ -241,14 +241,14 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
         <div className="card">
           <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div className="card-title">Daftar Aset / Kendaraan</div>
-            <button className="btn btn-primary btn-sm" onClick={() => setIsVehicleModalOpen(true)}>Tambah Alat</button>
+            <button className="btn btn-primary btn-sm" onClick={() => setIsVehicleModalOpen(true)}>Tambah Data</button>
           </div>
           <div className="card-body p-0">
             <table className="table">
               <thead>
                 <tr>
                   <th>Kode</th>
-                  <th>Nama Alat/Kendaraan</th>
+                  <th>Nama Kendaraan / Alat</th>
                   <th>Tipe</th>
                   <th>Nomor Polisi</th>
                   <th>Status</th>
