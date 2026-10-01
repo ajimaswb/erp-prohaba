@@ -3,14 +3,20 @@
 import { useState } from 'react';
 import { Truck, Droplet, Wrench, AlertTriangle, CheckCircle, Clock, TrendingUp, AlertOctagon, Activity } from 'lucide-react';
 
-function computeAvgConsumption(logs) {
+function computeAvgConsumption(logs, vehicleType) {
   const valid = logs.filter(l => l.meterValue && l.liters);
   if (valid.length < 2) return null;
   const sorted = [...valid].sort((a, b) => a.meterValue - b.meterValue);
   const totalLiters = sorted.reduce((sum, l) => sum + l.liters, 0);
   const meterRange = sorted[sorted.length - 1].meterValue - sorted[0].meterValue;
-  if (meterRange <= 0) return null;
-  return (totalLiters / meterRange * 100).toFixed(1);
+  if (meterRange <= 0 || totalLiters <= 0) return null;
+  if (vehicleType === 'ALAT_BERAT') {
+    // Alat berat: L/HM
+    return { value: (totalLiters / meterRange).toFixed(2), unit: 'L/HM' };
+  } else {
+    // Kendaraan: km/liter
+    return { value: (meterRange / totalLiters).toFixed(2), unit: 'km/L' };
+  }
 }
 
 function getMaintenanceStatus(log, currentMeter) {
@@ -126,7 +132,7 @@ function detectFuelAnomalies(fuelLogs) {
         type: 'HIGH_CONSUMPTION',
         severity: 'warning',
         label: 'Konsumsi BBM Abnormal Tinggi',
-        detail: `${(rate * 100).toFixed(1)} L/100 HM vs rata-rata ${(avgRate * 100).toFixed(1)} L/100 HM pada ${new Date(log.date).toLocaleDateString('id-ID')}`,
+        detail: `${(rate).toFixed(3)} L/HM vs rata-rata ${(avgRate).toFixed(3)} L/HM pada ${new Date(log.date).toLocaleDateString('id-ID')}`,
         date: log.date,
         log
       });
@@ -157,7 +163,7 @@ export default function MonitoringClient({ vehicles, fuelLogs, maintenanceLogs }
 
   const totalFuelCost = vehicleFuelLogs.reduce((sum, l) => sum + l.totalCost, 0);
   const totalLiters = vehicleFuelLogs.reduce((sum, l) => sum + l.liters, 0);
-  const avgConsumption = computeAvgConsumption(vehicleFuelLogs);
+  const avgConsumption = computeAvgConsumption(vehicleFuelLogs, selectedVehicle?.type);
   const recentFuelLogs = [...vehicleFuelLogs].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
   const anomalies = detectFuelAnomalies(vehicleFuelLogs);
   const sparepartLogs = vehicleMaintenanceLogs
@@ -279,7 +285,7 @@ export default function MonitoringClient({ vehicles, fuelLogs, maintenanceLogs }
                   </div>
                   <span style={{ fontSize: '13px', color: 'var(--gray-500)' }}>Rata-rata Konsumsi</span>
                 </div>
-                <div style={{ fontSize: '22px', fontWeight: 700 }}>{avgConsumption ? `${avgConsumption} L/100 ${selectedVehicle.type === 'ALAT_BERAT' ? 'HM' : 'km'}` : '-'}</div>
+                <div style={{ fontSize: '22px', fontWeight: 700 }}>{avgConsumption ? `${avgConsumption.value} ${avgConsumption.unit}` : '-'}</div>
               </div>
             </div>
           </div>
