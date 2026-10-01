@@ -89,7 +89,7 @@ export default function GuidebookPage() {
             <li><strong>Fitur Cerdas:</strong> Apabila tabel terlihat berantakan karena Anda baru saja menambah item yang posisinya berada paling bawah, Anda cukup klik <strong>Edit -&gt; Simpan</strong> pada item apa saja (tanpa perlu mengubah teksnya). Tabel otomatis akan menyusun ulang dan merapikan posisinya secara urut abjad dan numerik ke posisi hierarki yang benar!</li>
           </ol>
 
-          <h3 style={{ fontSize: '18px', fontWeight: '600', marginTop: '24pw, marginBottom: '12px, color: 'var(--navy-600)' }}>D. Mengatur Jadwal (Bulan Mulai & Bulan Selesai)</h3>
+          <h3 style={{ fontSize: '18px', fontWeight: '600', marginTop: '24px', marginBottom: '12px', color: 'var(--navy-600)' }}>D. Mengatur Jadwal (Bulan Mulai & Bulan Selesai)</h3>
           <ol style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <li>Pada setiap sub-pekerjaan (Level 2 ke bawah), terdapat input <strong>Bulan Mulai</strong> dan <strong>Bulan Selesai</strong>.</li>
             <li>Klik pada kolom tersebut dan pilih bulan/tahun dari kalender yang muncul.</li>
