@@ -2,12 +2,19 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Truck, Droplet, Wrench, Plus, History, Info } from 'lucide-react';
+import { Truck, Droplet, Wrench, Plus, History, Info, X } from 'lucide-react';
 import { useDialog } from '@/components/DialogProvider';
 
 export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLogs, projects }) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('fuel');
+  
+  // Add Vehicle State
+  const [isVehicleModalOpen, setIsVehicleModalOpen] = useState(false);
+  const [vCode, setVCode] = useState('');
+  const [vName, setVName] = useState('');
+  const [vType, setVType] = useState('KENDARAAN');
+  const [vPlate, setVPlate] = useState('');
   
   // Fuel Log State
   const [vehicleId, setVehicleId] = useState('');
@@ -20,6 +27,33 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showAlert } = useDialog();
+
+  const handleVehicleSubmit = async (e) => {
+    e.preventDefault();
+    if (!vName || !vType) {
+      await showAlert('Nama Alat dan Tipe wajib diisi.', 'Peringatan');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/logistik/vehicle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: vCode, name: vName, type: vType, plateNumber: vPlate, status: 'ACTIVE' })
+      });
+      if (!res.ok) throw new Error('Gagal menyimpan kendaraan');
+      await showAlert('Kendaraan berhasil ditambahkan!', 'Sukses');
+      setIsVehicleModalOpen(false);
+      setVCode('');
+      setVName('');
+      setVPlate('');
+      router.refresh();
+    } catch (err) {
+      await showAlert(err.message, 'Error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleFuelSubmit = async (e) => {
     e.preventDefault();
@@ -207,7 +241,7 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
         <div className="card">
           <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div className="card-title">Daftar Aset / Kendaraan</div>
-            <button className="btn btn-primary btn-sm">Tambah Alat</button>
+            <button className="btn btn-primary btn-sm" onClick={() => setIsVehicleModalOpen(true)}>Tambah Alat</button>
           </div>
           <div className="card-body p-0">
             <table className="table">
@@ -232,6 +266,49 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+      {/* Vehicle Modal */}
+      {isVehicleModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <div className="modal-title">Tambah Kendaraan / Alat Berat</div>
+              <button className="btn-close" onClick={() => setIsVehicleModalOpen(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--gray-500)' }}><X size={20} /></button>
+            </div>
+            <form onSubmit={handleVehicleSubmit}>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div className="form-group">
+                  <label className="form-label required">Nama Alat / Kendaraan</label>
+                  <input type="text" className="form-input" value={vName} onChange={e => setVName(e.target.value)} placeholder="Truk Fuso 12 Roda" />
+                </div>
+                <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div className="form-group">
+                    <label className="form-label">Kode (Opsional)</label>
+                    <input type="text" className="form-input" value={vCode} onChange={e => setVCode(e.target.value)} placeholder="TRK-001" />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Nomor Polisi</label>
+                    <input type="text" className="form-input" value={vPlate} onChange={e => setVPlate(e.target.value)} placeholder="B 1234 XYZ" />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label required">Kategori / Tipe</label>
+                  <select className="form-input form-select" value={vType} onChange={e => setVType(e.target.value)}>
+                    <option value="KENDARAAN">Kendaraan (Mobil, Truk, Pick-Up)</option>
+                    <option value="ALAT_BERAT">Alat Berat (Excavator, Buldozer, dll)</option>
+                    <option value="GENSET">Genset / Alat Statis</option>
+                  </select>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-outline" onClick={() => setIsVehicleModalOpen(false)}>Batal</button>
+                <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+                  {isSubmitting ? 'Menyimpan...' : 'Simpan Data'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
