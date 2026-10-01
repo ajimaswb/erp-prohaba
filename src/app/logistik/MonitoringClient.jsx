@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Truck, Droplet, Wrench, AlertTriangle, CheckCircle, Clock, TrendingUp } from 'lucide-react';
+import { Truck, Droplet, Wrench, AlertTriangle, CheckCircle, Clock, TrendingUp, AlertOctagon, Activity } from 'lucide-react';
 
 function computeAvgConsumption(logs) {
   const valid = logs.filter(l => l.meterValue && l.liters);
@@ -38,6 +38,110 @@ function getMaintenanceStatus(log, currentMeter) {
   return 'ok';
 }
 
+
+// ====== ANOMALY DETECTION ======
+function detectFuelAnomalies(fuelLogs) {
+  const anomalies = [];
+  if (fuelLogs.length < 2) return anomalies;
+
+  const sorted = [...fuelLogs].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  // Avg liters per fill-up
+  const avgLiters = sorted.reduce((s, l) => s + l.liters, 0) / sorted.length;
+
+  // Avg price per liter
+  const pricesPerLiter = sorted.map(l => l.totalCost / l.liters).filter(p => p > 0);
+  const avgPricePerLiter = pricesPerLiter.reduce((a, b) => a + b, 0) / pricesPerLiter.length;
+
+  // Consumption per HM/km
+  const consumptionRates = [];
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = sorted[i - 1];
+    const curr = sorted[i];
+    if (prev.meterValue && curr.meterValue && curr.meterValue > prev.meterValue) {
+      const delta = curr.meterValue - prev.meterValue;
+      const rate = curr.liters / delta; // liters per HM/km
+      consumptionRates.push({ rate, log: curr });
+    }
+  }
+  const avgRate = consumptionRates.length > 0
+    ? consumptionRates.reduce((s, r) => s + r.rate, 0) / consumptionRates.length
+    : null;
+
+  sorted.forEach((log, i) => {
+    // 1. Abnormally high volume fill-up
+    if (log.liters > avgLiters * 2 && avgLiters > 0) {
+      anomalies.push({
+        type: 'HIGH_VOLUME',
+        severity: 'danger',
+        label: 'Volume Pengisian Tidak Wajar',
+        detail: `${log.liters}L pada ${new Date(log.date).toLocaleDateString('id-ID')} — rata-rata ${avgLiters.toFixed(1)}L`,
+        date: log.date,
+        log
+      });
+    }
+
+    // 2. No meter reading
+    if (!log.meterValue) {
+      anomalies.push({
+        type: 'MISSING_METER',
+        severity: 'info',
+        label: 'Tanpa Data HM/Odometer',
+        detail: `Pengisian ${log.liters}L pada ${new Date(log.date).toLocaleDateString('id-ID')} tidak mencantumkan HM/km`,
+        date: log.date,
+        log
+      });
+    }
+
+    // 3. Unusual price per liter
+    const pricePerLiter = log.totalCost / log.liters;
+    if (pricePerLiter > avgPricePerLiter * 1.5 || pricePerLiter < avgPricePerLiter * 0.5) {
+      anomalies.push({
+        type: 'PRICE_ANOMALY',
+        severity: 'warning',
+        label: 'Harga/Liter Menyimpang',
+        detail: `Rp${Math.round(pricePerLiter).toLocaleString('id-ID')}/L vs rata-rata Rp${Math.round(avgPricePerLiter).toLocaleString('id-ID')}/L`,
+        date: log.date,
+        log
+      });
+    }
+
+    // 4. HM goes backward
+    if (i > 0 && log.meterValue && sorted[i - 1].meterValue && log.meterValue < sorted[i - 1].meterValue) {
+      anomalies.push({
+        type: 'METER_BACKWARD',
+        severity: 'danger',
+        label: 'HM/Odometer Menurun',
+        detail: `HM turun dari ${sorted[i - 1].meterValue} ke ${log.meterValue} pada ${new Date(log.date).toLocaleDateString('id-ID')}`,
+        date: log.date,
+        log
+      });
+    }
+  });
+
+  // 5. High consumption rate
+  consumptionRates.forEach(({ rate, log }) => {
+    if (avgRate && rate > avgRate * 1.7) {
+      anomalies.push({
+        type: 'HIGH_CONSUMPTION',
+        severity: 'warning',
+        label: 'Konsumsi BBM Abnormal Tinggi',
+        detail: `${(rate * 100).toFixed(1)} L/100 HM vs rata-rata ${(avgRate * 100).toFixed(1)} L/100 HM pada ${new Date(log.date).toLocaleDateString('id-ID')}`,
+        date: log.date,
+        log
+      });
+    }
+  });
+
+  return anomalies.sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
+const ANOMALY_STYLE = {
+  danger:  { color: '#ef4444', bg: '#fef2f2', border: '#fecaca', icon: AlertOctagon },
+  warning: { color: '#f59e0b', bg: '#fffbeb', border: '#fde68a', icon: AlertTriangle },
+  info:    { color: '#3b82f6', bg: '#eff6ff', border: '#bfdbfe', icon: Activity },
+};
+
 export default function MonitoringClient({ vehicles, fuelLogs, maintenanceLogs }) {
   const [selectedVehicleId, setSelectedVehicleId] = useState(vehicles[0]?.id || null);
 
@@ -55,6 +159,7 @@ export default function MonitoringClient({ vehicles, fuelLogs, maintenanceLogs }
   const totalLiters = vehicleFuelLogs.reduce((sum, l) => sum + l.liters, 0);
   const avgConsumption = computeAvgConsumption(vehicleFuelLogs);
   const recentFuelLogs = [...vehicleFuelLogs].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+  const anomalies = detectFuelAnomalies(vehicleFuelLogs);
   const sparepartLogs = vehicleMaintenanceLogs
     .filter(l => l.nextServiceMeter || l.nextServiceDate)
     .sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -178,6 +283,49 @@ export default function MonitoringClient({ vehicles, fuelLogs, maintenanceLogs }
               </div>
             </div>
           </div>
+
+          {/* Anomaly Alert Panel */}
+          {anomalies.length > 0 && (
+            <div className="card" style={{ marginBottom: '20px', border: '1px solid #fecaca' }}>
+              <div className="card-header" style={{ background: '#fff5f5', borderBottom: '1px solid #fecaca' }}>
+                <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ef4444' }}>
+                  <AlertOctagon size={16} />
+                  Deteksi Anomali BBM ({anomalies.length} peringatan)
+                </div>
+              </div>
+              <div className="card-body" style={{ padding: 0 }}>
+                {anomalies.map((a, idx) => {
+                  const cfg = ANOMALY_STYLE[a.severity];
+                  const Icon = cfg.icon;
+                  return (
+                    <div key={idx} style={{
+                      display: 'flex', alignItems: 'flex-start', gap: '12px',
+                      padding: '14px 16px', borderBottom: '1px solid var(--gray-100)',
+                      background: cfg.bg
+                    }}>
+                      <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'white', border: `1px solid ${cfg.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Icon size={16} style={{ color: cfg.color }} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 600, fontSize: '13px', color: cfg.color }}>{a.label}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--gray-600)', marginTop: '2px' }}>{a.detail}</div>
+                      </div>
+                      <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '100px', background: 'white', color: cfg.color, border: `1px solid ${cfg.border}`, fontWeight: 600, flexShrink: 0 }}>
+                        {a.severity === 'danger' ? '● Kritis' : a.severity === 'warning' ? '● Perhatian' : '● Info'}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {anomalies.length === 0 && vehicleFuelLogs.length >= 2 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', background: '#f0fdf4', borderRadius: '10px', border: '1px solid #bbf7d0', marginBottom: '20px' }}>
+              <CheckCircle size={16} style={{ color: '#10b981' }} />
+              <span style={{ fontSize: '13px', color: '#065f46', fontWeight: 500 }}>Tidak ada anomali terdeteksi. Konsumsi BBM kendaraan ini terlihat normal.</span>
+            </div>
+          )}
 
           {/* Sparepart + Fuel History */}
           <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
