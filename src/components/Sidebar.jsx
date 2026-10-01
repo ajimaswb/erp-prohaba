@@ -8,6 +8,7 @@ import {
   Wrench, Package, ShoppingCart, ShoppingBag,
   DollarSign, Banknote, Users, Calendar,
   CreditCard, UserCog, History, LogOut
+} from 'Truck, 
 } from 'lucide-react';
 import { useDialog } from './DialogProvider';
 
@@ -37,6 +38,7 @@ const NAV_ITEMS = [
       { href: '/documents', label: 'Dokumen Engineering', icon: Ruler, roles: ['TOP_MANAGEMENT', 'ENGINEERING', 'PJO', 'WORKSHOP'] },
       { href: '/workshop', label: 'Workshop', icon: Wrench, roles: ['TOP_MANAGEMENT', 'ENGINEERING', 'WORKSHOP', 'PJO'] },
       { href: '/material-request', label: 'Material Request', icon: Package, roles: ['TOP_MANAGEMENT', 'PJO', 'LOGISTIK'] },
+            { href: '/logistik', label: 'Logistik & Kendaraan', icon: Truck, roles: ['TOP_MANAGEMENT', 'PJO', 'LOGISTIK'] },
       { href: '/procurement', label: 'Procurement & PO', icon: ShoppingCart, roles: ['TOP_MANAGEMENT', 'LOGISTIK', 'FINANCE'] },
       { href: '/site-purchase', label: 'Pembelian Site', icon: ShoppingBag, roles: ['TOP_MANAGEMENT', 'PJO', 'LOGISTIK', 'FINANCE'] },
     ],

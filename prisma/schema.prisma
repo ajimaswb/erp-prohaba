@@ -33,6 +33,8 @@ model User {
   mrRequests          MaterialRequest[]
   purchaseFlags       PurchaseFlag[]
   auditLogs           AuditLog[]
+  fuelLogs            FuelLog[]
+  maintenanceLogs     MaintenanceLog[]
 }
 
 // ─── PROJECT ──────────────────────────────────────────────────────────────────
@@ -51,47 +53,49 @@ model Project {
   updatedAt     DateTime @updatedAt
 
   // Relations
-  boqItems         BOQItem[]
-  boqActuals       BoqActual[]
-  progressItems    ProgressItem[]
-  documents        Document[]
-  materialRequests MaterialRequest[]
-  purchaseOrders   PurchaseOrder[]
-  purchaseInvoices PurchaseInvoice[]
-  payrolls         Payroll[]
-  employees        EmployeeProject[]
-  scurveBaselines  SCurveBaseline[]
-  salesInvoices    SalesInvoice[]
+  boqItems          BOQItem[]
+  boqActuals        BoqActual[]
+  progressItems     ProgressItem[]
+  documents         Document[]
+  materialRequests  MaterialRequest[]
+  purchaseOrders    PurchaseOrder[]
+  purchaseInvoices  PurchaseInvoice[]
+  payrolls          Payroll[]
+  employees         EmployeeProject[]
+  scurveBaselines   SCurveBaseline[]
+  salesInvoices     SalesInvoice[]
   fabricationOrders FabricationOrder[]
+  fuelLogs          FuelLog[]
+  maintenanceLogs   MaintenanceLog[]
 }
 
 // ─── S-CURVE & PROGRESS ───────────────────────────────────────────────────────
 
 model BOQItem {
-  id           String  @id @default(cuid())
-  projectId    String
+  id            String  @id @default(cuid())
+  projectId     String
   // Hierarki
-  groupCode    String? // "A", "B", "C" — kelompok besar
-  no           String? // "1", "2", "3" — nomor item
-  subNo        String? // "a", "b", "c" — sub item
-  level        Int     @default(1) // 1=group, 2=item, 3=subitem
+  groupCode     String? // "A", "B", "C" — kelompok besar
+  no            String? // "1", "2", "3" — nomor item
+  subNo         String? // "a", "b", "c" — sub item
+  level         Int     @default(1) // 1=group, 2=item, 3=subitem
   // Identitas
-  code         String  // e.g. "A.1.a"
-  description  String
-  unit         String?
-  quantity     Float?
+  code          String // e.g. "A.1.a"
+  description   String
+  unit          String?
+  quantity      Float?
   // Harga
-  costMaterial Float?  // harga satuan bahan
-  costLabor    Float?  // harga satuan upah
+  costMaterial  Float? // harga satuan bahan
+  costLabor     Float? // harga satuan upah
   totalMaterial Float? // jumlah bahan
-  totalLabor   Float?  // jumlah upah
-  totalPrice   Float?  // total harga item
+  totalLabor    Float? // jumlah upah
+  totalPrice    Float? // total harga item
   // Bobot & Jadwal
-  weight       Float?  // bobot % dari total kontrak (auto-hitung)
-  startMonth   String? // "2025-01" (YYYY-MM)
-  endMonth     String? // "2025-06"
-  category     String  @default("GENERAL") // CIVIL | MECHANICAL | ELECTRICAL | GENERAL
-  sortOrder    Int     @default(0)
+  weight        Float? // bobot % dari total kontrak (auto-hitung)
+  startMonth    String? // "2025-01" (YYYY-MM)
+  endMonth      String? // "2025-06"
+  category      String  @default("GENERAL") // CIVIL | MECHANICAL | ELECTRICAL | GENERAL
+  sortOrder     Int     @default(0)
 
   project  Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
   progress ProgressItem[]
@@ -102,10 +106,10 @@ model BoqActual {
   id           String   @id @default(cuid())
   boqItemId    String
   projectId    String
-  month        String   // "2025-01"
+  month        String // "2025-01"
   volumeActual Float?
   costActual   Float?
-  progressPct  Float?   // % progress aktual item ini bulan ini
+  progressPct  Float? // % progress aktual item ini bulan ini
   notes        String?
   inputBy      String
   createdAt    DateTime @default(now())
@@ -118,9 +122,9 @@ model BoqActual {
 model SCurveBaseline {
   id        String   @id @default(cuid())
   projectId String
-  month     String?  // "2025-01" format (optional for backward compat)
-  planned   Float    // cumulative planned % at this month
-  actual    Float?   // cumulative actual % (nullable)
+  month     String? // "2025-01" format (optional for backward compat)
+  planned   Float // cumulative planned % at this month
+  actual    Float? // cumulative actual % (nullable)
   date      DateTime
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -161,7 +165,6 @@ model Document {
 
   project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   uploader User    @relation(fields: [uploadedBy], references: [id])
-
 }
 
 // ─── MATERIAL REQUEST ─────────────────────────────────────────────────────────
@@ -368,29 +371,29 @@ model PurchasePayment {
 }
 
 model SalesInvoice {
-  id               String    @id @default(cuid())
-  invoiceNo        String    @unique
-  projectId        String
-  description      String
-  
+  id          String @id @default(cuid())
+  invoiceNo   String @unique
+  projectId   String
+  description String
+
   // Nominal & Pajak
-  subTotal         Float     @default(0)
-  taxRate          Float     @default(11) // PPN 11%
-  taxAmount        Float     @default(0)
-  totalAmount      Float     @default(0)
+  subTotal    Float @default(0)
+  taxRate     Float @default(11) // PPN 11%
+  taxAmount   Float @default(0)
+  totalAmount Float @default(0)
 
-  date             DateTime
-  dueDate          DateTime?
-  category         String // TERMIN | PROGRESS_BILLING | DP | RETENTION_RELEASE
-  status           String    @default("UNPAID") // UNPAID | PAID | PARTIAL
-  
+  date     DateTime
+  dueDate  DateTime?
+  category String // TERMIN | PROGRESS_BILLING | DP | RETENTION_RELEASE
+  status   String    @default("UNPAID") // UNPAID | PAID | PARTIAL
+
   // Relasi Akuntansi
-  journalVoucherId String?   @unique
-  downPaymentId    String?   // Merujuk ke ID faktur DP yang dipotong
+  journalVoucherId String? @unique
+  downPaymentId    String? // Merujuk ke ID faktur DP yang dipotong
 
-  notes            String?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
   journalVoucher JournalVoucher? @relation(fields: [journalVoucherId], references: [id])
@@ -523,32 +526,32 @@ model AuditLog {
 // ─── WORKSHOP & FABRIKASI ─────────────────────────────────────────────────────
 
 model FabricationOrder {
-  id          String   @id @default(cuid())
-  orderNumber String   @unique // WO-2024-001
+  id          String    @id @default(cuid())
+  orderNumber String    @unique // WO-2024-001
   projectId   String
   description String
-  status      String   @default("PLANNED") // PLANNED | IN_PROGRESS | COMPLETED | DELIVERED
+  status      String    @default("PLANNED") // PLANNED | IN_PROGRESS | COMPLETED | DELIVERED
   startDate   DateTime?
   endDate     DateTime?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 
-  project      Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project      Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
   cuttingLists CuttingList[]
   deliveries   DeliveryTicket[]
 }
 
 model CuttingList {
-  id                 String   @id @default(cuid())
+  id                 String  @id @default(cuid())
   fabricationOrderId String
-  materialName       String   
-  dimensions         String?  
-  quantity           Int      @default(1)
-  status             String   @default("PENDING") // PENDING | CUT | WELDED | FINISHED
-  
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  materialName       String
+  dimensions         String?
+  quantity           Int     @default(1)
+  status             String  @default("PENDING") // PENDING | CUT | WELDED | FINISHED
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   fabricationOrder FabricationOrder @relation(fields: [fabricationOrderId], references: [id], onDelete: Cascade)
 }
@@ -562,8 +565,67 @@ model DeliveryTicket {
   deliveryDate       DateTime
   status             String   @default("IN_TRANSIT") // IN_TRANSIT | RECEIVED_AT_SITE
 
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   fabricationOrder FabricationOrder @relation(fields: [fabricationOrderId], references: [id], onDelete: Cascade)
+}
+
+// ─── KENDARAAN & ALAT BERAT ───────────────────────────────────────────────────
+
+model Vehicle {
+  id          String   @id @default(cuid())
+  name        String // e.g., Excavator PC 200
+  plateNumber String? // e.g., B 1234 XYZ
+  code        String?  @unique // e.g., EXC-01
+  type        String // ALAT_BERAT | KENDARAAN | GENSET
+  status      String   @default("ACTIVE") // ACTIVE | MAINTENANCE | INACTIVE
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  fuelLogs        FuelLog[]
+  maintenanceLogs MaintenanceLog[]
+}
+
+model FuelLog {
+  id         String   @id @default(cuid())
+  vehicleId  String
+  projectId  String?
+  date       DateTime
+  fuelType   String // SOLAR | DEXLITE | PERTAMAX | etc
+  liters     Float
+  totalCost  Float
+  meterValue Float? // Odometer or Hour Meter
+  operator   String?
+  notes      String?
+  recordedBy String // User ID
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vehicle Vehicle  @relation(fields: [vehicleId], references: [id])
+  project Project? @relation(fields: [projectId], references: [id])
+  user    User     @relation(fields: [recordedBy], references: [id])
+}
+
+model MaintenanceLog {
+  id          String   @id @default(cuid())
+  vehicleId   String
+  projectId   String?
+  date        DateTime
+  type        String // SERVICE | GANTI_OLI | SPAREPART | REPAIR
+  description String
+  cost        Float
+  meterValue  Float? // Odometer or Hour Meter when serviced
+  mechanic    String?
+  notes       String?
+  recordedBy  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  vehicle Vehicle  @relation(fields: [vehicleId], references: [id])
+  project Project? @relation(fields: [projectId], references: [id])
+  user    User     @relation(fields: [recordedBy], references: [id])
 }
