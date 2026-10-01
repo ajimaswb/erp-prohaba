@@ -279,7 +279,7 @@ export default function MonitoringClient({ vehicles, fuelLogs, maintenanceLogs }
                   </div>
                   <span style={{ fontSize: '13px', color: 'var(--gray-500)' }}>Rata-rata Konsumsi</span>
                 </div>
-                <div style={{ fontSize: '22px', fontWeight: 700 }}>{avgConsumption ? `${avgConsumption} L/100` : '-'}</div>
+                <div style={{ fontSize: '22px', fontWeight: 700 }}>{avgConsumption ? `${avgConsumption} L/100 ${selectedVehicle.type === 'ALAT_BERAT' ? 'HM' : 'km'}` : '-'}</div>
               </div>
             </div>
           </div>
