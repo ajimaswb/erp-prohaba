@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Building2, LineChart, Ruler,
   Wrench, Package, ShoppingCart, ShoppingBag,
   DollarSign, Banknote, Users, Calendar,
-  CreditCard, UserCog, History, LogOut, BookOpen
+  CreditCard, UserCog, History, LogOut
 } from 'lucide-react';
 import { useDialog } from './DialogProvider';
 
@@ -60,8 +60,7 @@ const NAV_ITEMS = [
     items: [
       { href: '/users', label: 'Pengguna', icon: UserCog, roles: ['TOP_MANAGEMENT'] },
       { href: '/audit-log', label: 'Audit Log', icon: History, roles: ['TOP_MANAGEMENT'] },
-      { href: '/guidebook', label: 'Buku Panduan', icon: BookOpen, roles: ['ALL'] },
-    ],
+          ],
   },
 ];
 
