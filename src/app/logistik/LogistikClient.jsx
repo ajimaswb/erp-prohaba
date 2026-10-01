@@ -115,7 +115,7 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
         </button>
         <button className={`tab ${activeTab === 'vehicles' ? 'active' : ''}`} onClick={() => setActiveTab('vehicles')}>
           <Truck size={16} className="inline-block mr-2" />
-          Data Alat Berat
+          Data Kendaraan & Alat Berat
         </button>
       </div>
 
