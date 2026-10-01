@@ -36,10 +36,10 @@ export default async function LogistikPage() {
   });
 
   return (
-    <div className=page-container>
-      <div className=page-header>
-        <h1 className=page-title>Kendaraan & Alat Berat</h1>
-        <p className=page-subtitle>Monitoring pemakaian BBM dan perawatan logistik.</p>
+    <div className="page-container">
+      <div className="page-header">
+        <h1 className="page-title">Kendaraan & Alat Berat</h1>
+        <p className="page-subtitle">Monitoring pemakaian BBM dan perawatan logistik.</p>
       </div>
       <LogistikClient 
         user={session?.user} 

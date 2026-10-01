@@ -7,8 +7,8 @@ import {
   LayoutDashboard, Building2, LineChart, Ruler,
   Wrench, Package, ShoppingCart, ShoppingBag,
   DollarSign, Banknote, Users, Calendar,
-  CreditCard, UserCog, History, LogOut
-} from 'Truck, 
+  CreditCard, UserCog, History, LogOut,
+  Truck
 } from 'lucide-react';
 import { useDialog } from './DialogProvider';
 
