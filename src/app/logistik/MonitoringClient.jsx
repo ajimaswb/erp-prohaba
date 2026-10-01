@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Truck, Droplet, Wrench, AlertTriangle, CheckCircle, Clock, TrendingUp, AlertOctagon, Activity } from 'lucide-react';
+import { Truck, Droplet, Wrench, AlertTriangle, CheckCircle, Clock, TrendingUp, AlertOctagon, Activity, CalendarDays } from 'lucide-react';
 
 function computeAvgConsumption(logs, vehicleType) {
   const valid = logs.filter(l => l.meterValue && l.liters);
@@ -152,7 +152,8 @@ export default function MonitoringClient({ vehicles, fuelLogs, maintenanceLogs }
   const [selectedVehicleId, setSelectedVehicleId] = useState(vehicles[0]?.id || null);
 
   const selectedVehicle = vehicles.find(v => v.id === selectedVehicleId);
-  const vehicleFuelLogs = fuelLogs.filter(l => l.vehicleId === selectedVehicleId);
+  const vehicleFuelLogsAll = fuelLogs.filter(l => l.vehicleId === selectedVehicleId);
+  const vehicleFuelLogs = filterByPeriod(vehicleFuelLogsAll);
   const vehicleMaintenanceLogs = maintenanceLogs.filter(l => l.vehicleId === selectedVehicleId);
 
   const allMeterReadings = [
