@@ -1,6 +1,7 @@
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import LogistikClient from './LogistikClient';
+import AppLayout from '@/components/AppLayout';
 
 export const metadata = {
   title: 'Logistik & Alat Berat - ERP Prohaba',
@@ -36,11 +37,7 @@ export default async function LogistikPage() {
   });
 
   return (
-    <div className="page-container">
-      <div className="page-header">
-        <h1 className="page-title">Kendaraan & Alat Berat</h1>
-        <p className="page-subtitle">Monitoring pemakaian BBM dan perawatan logistik.</p>
-      </div>
+    <AppLayout title="Kendaraan & Alat Berat" subtitle="Monitoring pemakaian BBM dan perawatan logistik." user={session?.user}>
       <LogistikClient 
         user={session?.user} 
         vehicles={vehicles} 
@@ -48,6 +45,6 @@ export default async function LogistikPage() {
         maintenanceLogs={maintenanceLogs}
         projects={projects}
       />
-    </div>
+    </AppLayout>
   );
 }
