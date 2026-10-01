@@ -25,6 +25,15 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
   const [meterValue, setMeterValue] = useState('');
   const [operator, setOperator] = useState('');
   
+  // Maintenance Log State
+  const [mVehId, setMVehId] = useState('');
+  const [mProjId, setMProjId] = useState('');
+  const [mType, setMType] = useState('SERVICE');
+  const [mDesc, setMDesc] = useState('');
+  const [mCost, setMCost] = useState('');
+  const [mMeter, setMMeter] = useState('');
+  const [mMechanic, setMMechanic] = useState('');
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showAlert } = useDialog();
 
@@ -48,6 +57,49 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
       setVName('');
       setVPlate('');
       router.refresh();
+    } catch (err) {
+      await showAlert(err.message, 'Error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleMaintenanceSubmit = async (e) => {
+    e.preventDefault();
+    if (!mVehId || !mType || !mDesc || !mCost) {
+      await showAlert('Lengkapi data wajib (Kendaraan, Jenis, Deskripsi, Biaya)', 'Peringatan');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/logistik/maintenance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vehicleId: mVehId,
+          projectId: mProjId || null,
+          type: mType,
+          description: mDesc,
+          cost: parseFloat(mCost),
+          meterValue: mMeter ? parseFloat(mMeter) : null,
+          mechanic: mMechanic
+        })
+      });
+
+      if (!res.ok) throw new Error('Gagal menyimpan log servis');
+
+      await showAlert('Data servis berhasil ditambahkan!', 'Sukses');
+      
+      // Reset
+      setMVehId('');
+      setMProjId('');
+      setMDesc('');
+      setMCost('');
+      setMMeter('');
+      setMMechanic('');
+      router.refresh();
+      
     } catch (err) {
       await showAlert(err.message, 'Error');
     } finally {
@@ -228,11 +280,110 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
       )}
 
       {activeTab === 'maintenance' && (
-        <div className="card">
-          <div className="card-body text-center py-12">
-            <Wrench size={48} style={{ color: 'var(--gray-300)', margin: '0 auto 16px' }} />
-            <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--gray-700)' }}>Modul Perawatan & Servis</h3>
-            <p style={{ color: 'var(--gray-500)', marginTop: '8px' }}>Pencatatan ganti oli, penggantian sparepart, dan servis sedang dalam tahap pengembangan UI.</p>
+        <div className="grid" style={{ gridTemplateColumns: '1fr 2fr', gap: '24px' }}>
+          {/* Form Input Maintenance */}
+          <div className="card">
+            <div className="card-header">
+              <div className="card-title">Input Perawatan & Servis</div>
+            </div>
+            <div className="card-body">
+              <form onSubmit={handleMaintenanceSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div className="form-group">
+                  <label className="form-label required">Kendaraan / Alat Berat</label>
+                  <select className="form-input form-select" value={mVehId} onChange={e => setMVehId(e.target.value)}>
+                    <option value="">-- Pilih Kendaraan --</option>
+                    {vehicles.map(v => (
+                      <option key={v.id} value={v.id}>{v.name} ({v.code || v.plateNumber})</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Proyek (Opsional)</label>
+                  <select className="form-input form-select" value={mProjId} onChange={e => setMProjId(e.target.value)}>
+                    <option value="">-- Kantor Pusat / Gudang --</option>
+                    {projects.map(p => (
+                      <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label required">Jenis Servis</label>
+                  <select className="form-input form-select" value={mType} onChange={e => setMType(e.target.value)}>
+                    <option value="SERVICE">Servis Rutin</option>
+                    <option value="GANTI_OLI">Ganti Oli</option>
+                    <option value="SPAREPART">Penggantian Sparepart</option>
+                    <option value="REPAIR">Perbaikan / Repair</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label required">Deskripsi / Detail Part</label>
+                  <textarea className="form-input" rows="2" value={mDesc} onChange={e => setMDesc(e.target.value)} placeholder="Misal: Ganti kampas rem, Filter solar..."></textarea>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label required">Total Biaya (Rp)</label>
+                  <input type="number" className="form-input" value={mCost} onChange={e => setMCost(e.target.value)} placeholder="Rp..." />
+                </div>
+
+                <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div className="form-group">
+                    <label className="form-label">HM / Odometer</label>
+                    <input type="number" className="form-input" value={mMeter} onChange={e => setMMeter(e.target.value)} placeholder="Angka km/jam" />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Mekanik / Bengkel</label>
+                    <input type="text" className="form-input" value={mMechanic} onChange={e => setMMechanic(e.target.value)} placeholder="Nama bengkel..." />
+                  </div>
+                </div>
+
+                <button type="submit" className="btn btn-primary" disabled={isSubmitting} style={{ marginTop: '8px' }}>
+                  <Wrench size={16} className="inline-block mr-2" />
+                  Simpan Data Servis
+                </button>
+              </form>
+            </div>
+          </div>
+
+          {/* Tabel History Maintenance */}
+          <div className="card">
+            <div className="card-header">
+              <div className="card-title">Riwayat Perawatan Terakhir</div>
+            </div>
+            <div className="card-body p-0">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Tanggal</th>
+                    <th>Kendaraan</th>
+                    <th>Jenis</th>
+                    <th>Deskripsi</th>
+                    <th>Biaya</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {maintenanceLogs.length === 0 ? (
+                    <tr><td colSpan={5} className="text-center py-8 text-gray-500">Belum ada riwayat servis.</td></tr>
+                  ) : (
+                    maintenanceLogs.slice(0, 10).map(log => (
+                      <tr key={log.id}>
+                        <td style={{ fontSize: '13px' }}>{new Date(log.date).toLocaleDateString('id-ID')}</td>
+                        <td style={{ fontWeight: 600 }}>{log.vehicle.name} <span style={{ fontSize: '12px', color: 'var(--gray-500)' }}>({log.vehicle.code})</span></td>
+                        <td><span className="badge badge-info">{log.type}</span></td>
+                        <td style={{ maxWidth: '200px' }}>
+                          <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={log.description}>
+                            {log.description}
+                          </div>
+                        </td>
+                        <td style={{ fontWeight: 600 }}>{formatCurrency(log.cost)}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
