@@ -311,7 +311,7 @@ export default function MonitoringClient({ vehicles, fuelLogs, maintenanceLogs }
                         <div style={{ fontSize: '12px', color: 'var(--gray-600)', marginTop: '2px' }}>{a.detail}</div>
                       </div>
                       <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '100px', background: 'white', color: cfg.color, border: `1px solid ${cfg.border}`, fontWeight: 600, flexShrink: 0 }}>
-                        {a.severity === 'danger' ? '● Kritis' : a.severity === 'warning' ? '● Perhatian' : '● Info'}
+                        {a.severity === 'danger' ? 'Kritis' : a.severity === 'warning' ? 'Perhatian' : 'Info'}
                       </span>
                     </div>
                   );

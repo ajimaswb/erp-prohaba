@@ -361,7 +361,7 @@ export default function LogistikClient({ user, vehicles, fuelLogs, maintenanceLo
                 )}
 
                 <div style={{ background: 'var(--gray-50)', borderRadius: '10px', padding: '14px', border: '1px dashed var(--gray-200)' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--gray-600)', marginBottom: '10px' }}>🔔 Target Servis Berikutnya (untuk tracking)</div>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--gray-600)', marginBottom: '10px' }}>Target Servis Berikutnya (untuk tracking)</div>
                   <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     <div className="form-group">
                       <label className="form-label">Target HM / km</label>
