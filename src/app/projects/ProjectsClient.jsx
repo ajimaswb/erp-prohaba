@@ -72,8 +72,8 @@ export default function ProjectsClient({ initialProjects, user }) {
       client: p.client || '',
       location: p.location || '',
       contractValue: p.contractValue || '',
-      startDate: p.startDate ? p.startDate.split('T')[0] : '',
-      endDate: p.endDate ? p.endDate.split('T')[0] : '',
+      startDate: p.startDate ? new Date(p.startDate).toISOString().split('T')[0] : '',
+      endDate: p.endDate ? new Date(p.endDate).toISOString().split('T')[0] : '',
       status: p.status || 'ACTIVE',
     });
   };
