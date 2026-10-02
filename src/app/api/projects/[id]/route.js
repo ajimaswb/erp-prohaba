@@ -33,6 +33,9 @@ export async function PATCH(req, { params }) {
     const { id } = await params;
     const body = await req.json();
 
+    const newContractValue = body.contractValue ? parseFloat(body.contractValue) : null;
+    const oldProject = await prisma.project.findUnique({ where: { id } });
+
     const updated = await prisma.project.update({
       where: { id },
       data: {
@@ -40,12 +43,28 @@ export async function PATCH(req, { params }) {
         name: body.name,
         client: body.client,
         location: body.location,
-        contractValue: body.contractValue ? parseFloat(body.contractValue) : null,
+        contractValue: newContractValue,
         startDate: body.startDate ? new Date(body.startDate) : null,
         endDate: body.endDate ? new Date(body.endDate) : null,
         status: body.status,
       }
     });
+
+    // If contract value changed, recalculate all BOQ item weights
+    if (newContractValue && oldProject.contractValue !== newContractValue) {
+      const boqItems = await prisma.bOQItem.findMany({ where: { projectId: id } });
+      if (boqItems.length > 0) {
+        for (const item of boqItems) {
+          if (item.totalPrice != null) {
+            const newWeight = parseFloat(((item.totalPrice / newContractValue) * 100).toFixed(4));
+            await prisma.bOQItem.update({
+              where: { id: item.id },
+              data: { weight: newWeight }
+            });
+          }
+        }
+      }
+    }
 
     return NextResponse.json(updated);
   } catch (err) {
