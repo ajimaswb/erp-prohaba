@@ -150,6 +150,16 @@ const ANOMALY_STYLE = {
 
 export default function MonitoringClient({ vehicles, fuelLogs, maintenanceLogs }) {
   const [selectedVehicleId, setSelectedVehicleId] = useState(vehicles[0]?.id || null);
+  const [period, setPeriod] = useState('month');
+
+  const periodStart = (() => {
+    const now = new Date();
+    if (period === 'month') return new Date(now.getFullYear(), now.getMonth(), 1);
+    if (period === 'quarter') { const d = new Date(); d.setMonth(d.getMonth() - 3); return d; }
+    if (period === 'year') return new Date(now.getFullYear(), 0, 1);
+    return null;
+  })();
+  const filterByPeriod = (logs) => !periodStart ? logs : logs.filter(l => new Date(l.date) >= periodStart);
 
   const selectedVehicle = vehicles.find(v => v.id === selectedVehicleId);
   const vehicleFuelLogsAll = fuelLogs.filter(l => l.vehicleId === selectedVehicleId);
