@@ -3,7 +3,20 @@ import * as XLSX from 'xlsx';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 
+// Determine hierarchy level from code like A, A.1, A.1.a, A.1.a.1, B.I, B.I.1, Sub Total A
+function parseCodeLevel(code) {
+  const s = String(code).trim();
 
+  // Skip rows like "Sub Total X", "TOTAL", "Grand Total"
+  if (/^(sub total|total|grand total)/i.test(s)) return { level: 0, isTotal: true };
+
+  // Pure single letter: A, B, C → level 1 (group header)
+  if (/^[A-Z]$/.test(s)) return { level: 1 };
+
+  // Split by dots to count depth: A.1 → 2, A.1.a → 3, A.1.a.1 → 4
+  const parts = s.split('.');
+  return { level: parts.length };
+}
 
 export async function POST(req) {
   try {
@@ -26,74 +39,90 @@ export async function POST(req) {
     const project = await prisma.project.findUnique({ where: { id: projectId } });
     if (!project) return NextResponse.json({ error: 'Project tidak ditemukan' }, { status: 404 });
 
-    // Find data start row
-    let dataStartRow = 0;
+    // ── Find header row (row containing "URAIAN") ──────────────────────────
+    let headerRow = -1;
     for (let i = 0; i < rawRows.length; i++) {
       const row = rawRows[i];
-      if (row && row.some(c => typeof c === 'string' && c.toLowerCase().includes('uraian'))) {
-        dataStartRow = i + 3;
+      if (row && row.some(c => typeof c === 'string' && /uraian/i.test(c))) {
+        headerRow = i;
         break;
       }
     }
 
+    // Data starts after header + 2 numbering rows (row 11, 12, 13 → data from 14)
+    const dataStartRow = headerRow >= 0 ? headerRow + 3 : 13;
+
+    // ── Column mapping (0-indexed) ─────────────────────────────────────────
+    // Col 0: NO / KODE
+    // Col 1: URAIAN PEKERJAAN
+    // Col 2: VOLUME AMM (owner)
+    // Col 3: VOLUME PJM (contractor, this is the one we use)
+    // Col 4: SATUAN
+    // Col 5: HARGA SATUAN BAHAN
+    // Col 6: HARGA SATUAN UPAH
+    // Col 7: JUMLAH HARGA BAHAN
+    // Col 8: JUMLAH HARGA UPAH
+    // Col 9: TOTAL PRICE
+
     const items = [];
-    let currentGroup = null;
-    let currentNo = null;
     let sortOrder = 0;
 
     for (let i = dataStartRow; i < rawRows.length; i++) {
       const row = rawRows[i];
       if (!row || row.every(c => c === null || c === undefined || c === '')) continue;
 
-      const col0 = row[0];
-      const col1 = row[1];
-      const col2 = row[2];
-      const col3 = row[3];
-      const col4 = row[4];
-      const col5 = row[5];
-      const col6 = row[6];
-      const col7 = row[7];
-      const col8 = row[8];
+      const rawCode = row[0];
+      const desc = row[1] != null ? String(row[1]).trim() : null;
 
-      const desc = col1 != null ? String(col1).trim() : (col0 != null ? String(col0).trim() : null);
-      if (!desc) continue;
+      if (!rawCode || !desc) continue;
 
-      const baseItem = {
+      const code = String(rawCode).trim();
+      const { level, isTotal } = parseCodeLevel(code);
+
+      // Skip subtotal / total rows
+      if (isTotal || level === 0) continue;
+
+      const volPJM   = typeof row[3] === 'number' ? row[3] : null;
+      const unit     = row[4] != null ? String(row[4]).trim() : null;
+      const hrgBahan = typeof row[5] === 'number' ? row[5] : null;
+      const hrgUpah  = typeof row[6] === 'number' ? row[6] : null;
+      const jmlBahan = typeof row[7] === 'number' ? row[7] : (typeof row[7] === 'number' ? row[7] : null);
+      const jmlUpah  = typeof row[8] === 'number' ? row[8] : null;
+      const total    = typeof row[9] === 'number' ? row[9] : null;
+
+      // Derive groupCode from first segment of code
+      const groupCode = code.split('.')[0];
+
+      items.push({
         projectId,
-        unit: col3 != null ? String(col3) : null,
-        quantity: typeof col2 === 'number' ? col2 : null,
-        costMaterial: typeof col4 === 'number' ? col4 : null,
-        costLabor: typeof col5 === 'number' ? col5 : null,
-        totalMaterial: typeof col6 === 'number' ? col6 : null,
-        totalLabor: typeof col7 === 'number' ? col7 : null,
-        totalPrice: typeof col8 === 'number' ? col8 : null,
+        code,
+        groupCode,
+        description: desc,
+        level,
         sortOrder: sortOrder++,
-      };
-
-      if (typeof col0 === 'string' && /^[A-Z]$/.test(col0.trim())) {
-        currentGroup = col0.trim();
-        currentNo = null;
-        items.push({ ...baseItem, groupCode: currentGroup, no: null, subNo: null, level: 1, code: currentGroup, description: desc, unit: null, quantity: null, costMaterial: null, costLabor: null, totalMaterial: null, totalLabor: null, totalPrice: null });
-      } else if (typeof col0 === 'number' && Number.isInteger(col0)) {
-        currentNo = String(col0);
-        items.push({ ...baseItem, groupCode: currentGroup, no: currentNo, subNo: null, level: 2, code: currentGroup ? `${currentGroup}.${currentNo}` : currentNo, description: desc });
-      } else if (col0 === null && col1 != null) {
-        const subMatch = String(col1).trim().match(/^([a-z])\.\s*/);
-        if (subMatch) {
-          const subNo = subMatch[1];
-          items.push({ ...baseItem, groupCode: currentGroup, no: currentNo, subNo, level: 3, code: `${currentGroup || ''}.${currentNo || ''}.${subNo}`, description: String(col1).replace(/^[a-z]\.\s*/, '').trim() });
-        } else {
-          items.push({ ...baseItem, groupCode: currentGroup, no: currentNo, subNo: null, level: 4, code: `${currentGroup || ''}.${currentNo || ''}.detail.${sortOrder}`, description: desc });
-        }
-      }
+        unit,
+        quantity: volPJM,
+        costMaterial: hrgBahan,
+        costLabor: hrgUpah,
+        totalMaterial: jmlBahan,
+        totalLabor: jmlUpah,
+        totalPrice: total,
+        weight: null, // calculated below
+        no: null,
+        subNo: null,
+      });
     }
 
+    // Calculate weight (%) based on totalPrice vs contractValue
     const contractValue = project.contractValue || 0;
     const itemsWithWeight = items.map(item => ({
       ...item,
-      weight: contractValue && item.totalPrice ? parseFloat(((item.totalPrice / contractValue) * 100).toFixed(4)) : null,
+      weight: contractValue && item.totalPrice
+        ? parseFloat(((item.totalPrice / contractValue) * 100).toFixed(4))
+        : null,
     }));
 
+    // Replace all BOQ items for this project
     await prisma.bOQItem.deleteMany({ where: { projectId } });
     await prisma.bOQItem.createMany({ data: itemsWithWeight });
 
