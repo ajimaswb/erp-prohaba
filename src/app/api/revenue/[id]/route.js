@@ -8,7 +8,7 @@ export async function PATCH(request, { params }) {
     const session = await auth();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const id = params.id;
+    const { id } = await params;
     const { status, notes } = await request.json();
 
     const invoice = await prisma.salesInvoice.update({
@@ -31,7 +31,7 @@ export async function DELETE(request, { params }) {
     const session = await auth();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const id = params.id;
+    const { id } = await params;
     const invoice = await prisma.salesInvoice.findUnique({ where: { id } });
     if (!invoice) return NextResponse.json({ error: 'Tagihan tidak ditemukan' }, { status: 404 });
 

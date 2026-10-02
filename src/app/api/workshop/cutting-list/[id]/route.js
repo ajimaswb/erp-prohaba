@@ -4,12 +4,13 @@ import { auth } from '@/lib/auth';
 
 export async function PATCH(req, { params }) {
   try {
+    const { id } = await params;
     const session = await auth();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
     const updated = await prisma.cuttingList.update({
-      where: { id: params.id },
+      where: { id: id },
       data: { status: body.status }
     });
 
@@ -25,7 +26,7 @@ export async function DELETE(req, { params }) {
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     await prisma.cuttingList.delete({
-      where: { id: params.id }
+      where: { id: id }
     });
 
     return NextResponse.json({ success: true });

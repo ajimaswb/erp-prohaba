@@ -10,7 +10,7 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const id = params.id;
+    const { id } = await params;
     const body = await req.json();
     const { name, email, role, isActive, password } = body;
 

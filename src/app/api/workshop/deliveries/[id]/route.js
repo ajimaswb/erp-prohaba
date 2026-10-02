@@ -4,12 +4,13 @@ import { auth } from '@/lib/auth';
 
 export async function PATCH(req, { params }) {
   try {
+    const { id } = await params;
     const session = await auth();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
     const updated = await prisma.deliveryTicket.update({
-      where: { id: params.id },
+      where: { id: id },
       data: { status: body.status }
     });
 

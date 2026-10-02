@@ -11,7 +11,7 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ error: 'Forbidden: Hak akses ditolak. Hanya TOP_MANAGEMENT yang dapat menghapus proyek.' }, { status: 403 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     
     // Project dan semua relasinya akan dihapus otomatis karena onDelete: Cascade di schema
     await prisma.project.delete({

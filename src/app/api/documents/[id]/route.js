@@ -13,7 +13,7 @@ export async function DELETE(req, { params }) {
        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const document = await prisma.document.findUnique({ where: { id } });
     if (!document) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
