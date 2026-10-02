@@ -24,3 +24,32 @@ export async function DELETE(req, { params }) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+export async function PATCH(req, { params }) {
+  try {
+    const session = await auth();
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const { id } = await params;
+    const body = await req.json();
+
+    const updated = await prisma.project.update({
+      where: { id },
+      data: {
+        code: body.code,
+        name: body.name,
+        client: body.client,
+        location: body.location,
+        contractValue: body.contractValue ? parseFloat(body.contractValue) : null,
+        startDate: body.startDate ? new Date(body.startDate) : null,
+        endDate: body.endDate ? new Date(body.endDate) : null,
+        status: body.status,
+      }
+    });
+
+    return NextResponse.json(updated);
+  } catch (err) {
+    console.error('PATCH project error:', err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}

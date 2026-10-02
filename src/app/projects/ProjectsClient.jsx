@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Building2, Plus, Calendar, MapPin, Search, Trash2 } from 'lucide-react';
+import { Building2, Plus, Calendar, MapPin, Search, Trash2, Pencil } from 'lucide-react';
 import { useDialog } from '@/components/DialogProvider';
 
 export default function ProjectsClient({ initialProjects, user }) {
   const router = useRouter();
   const [projects, setProjects] = useState(initialProjects);
   const [showModal, setShowModal] = useState(false);
+  const [editingProject, setEditingProject] = useState(null); // project being edited
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showAlert, showConfirm } = useDialog();
 
@@ -63,6 +64,45 @@ export default function ProjectsClient({ initialProjects, user }) {
     }
   };
 
+  const handleEditProject = (p) => {
+    setEditingProject({
+      id: p.id,
+      code: p.code,
+      name: p.name,
+      client: p.client || '',
+      location: p.location || '',
+      contractValue: p.contractValue || '',
+      startDate: p.startDate ? p.startDate.split('T')[0] : '',
+      endDate: p.endDate ? p.endDate.split('T')[0] : '',
+      status: p.status || 'ACTIVE',
+    });
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`/api/projects/${editingProject.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingProject),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || 'Gagal memperbarui proyek');
+      }
+      const updated = await res.json();
+      setProjects(prev => prev.map(p => p.id === updated.id ? updated : p));
+      setEditingProject(null);
+      router.refresh();
+      await showAlert('Proyek berhasil diperbarui!', 'Sukses');
+    } catch (error) {
+      await showAlert(error.message, 'Error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Action Bar */}
@@ -100,20 +140,36 @@ export default function ProjectsClient({ initialProjects, user }) {
                     {p.status}
                   </span>
                   {user?.role === 'TOP_MANAGEMENT' && (
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); handleDeleteProject(p.id, p.code); }}
-                    style={{ 
-                      background: 'none', border: 'none', padding: 6, 
-                      borderRadius: 6, color: 'var(--red-500)', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      backgroundColor: 'var(--red-50)'
-                    }}
-                    title="Hapus Proyek"
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--red-100)'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--red-50)'}
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                    <>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleEditProject(p); }}
+                        style={{
+                          background: 'none', border: 'none', padding: 6,
+                          borderRadius: 6, color: 'var(--navy-600)', cursor: 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          backgroundColor: 'var(--navy-50)'
+                        }}
+                        title="Edit Proyek"
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--navy-100)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--navy-50)'}
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleDeleteProject(p.id, p.code); }}
+                        style={{
+                          background: 'none', border: 'none', padding: 6,
+                          borderRadius: 6, color: 'var(--red-500)', cursor: 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          backgroundColor: 'var(--red-50)'
+                        }}
+                        title="Hapus Proyek"
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--red-100)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--red-50)'}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -197,6 +253,94 @@ export default function ProjectsClient({ initialProjects, user }) {
                   <button type="button" className="btn btn-outline" onClick={() => setShowModal(false)}>Batal</button>
                   <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
                     {isSubmitting ? 'Menyimpan...' : 'Simpan Proyek'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Edit Project Modal */}
+      {editingProject && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.5)', zIndex: 1000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div className="card" style={{ width: 500, maxHeight: '90vh', overflowY: 'auto' }}>
+            <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="card-title">Edit Proyek — {editingProject.code}</div>
+              <button onClick={() => setEditingProject(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>&times;</button>
+            </div>
+            <div className="card-body">
+              <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div className="form-group">
+                    <label className="form-label required">Kode Proyek</label>
+                    <input type="text" className="form-input" required
+                      value={editingProject.code}
+                      onChange={e => setEditingProject({...editingProject, code: e.target.value})} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Status</label>
+                    <select className="form-input form-select"
+                      value={editingProject.status}
+                      onChange={e => setEditingProject({...editingProject, status: e.target.value})}>
+                      <option value="ACTIVE">Active</option>
+                      <option value="COMPLETED">Completed</option>
+                      <option value="ON_HOLD">On Hold</option>
+                      <option value="CANCELLED">Cancelled</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label required">Nama Proyek</label>
+                  <input type="text" className="form-input" required
+                    value={editingProject.name}
+                    onChange={e => setEditingProject({...editingProject, name: e.target.value})} />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label required">Klien / Pemilik</label>
+                  <input type="text" className="form-input" required
+                    value={editingProject.client}
+                    onChange={e => setEditingProject({...editingProject, client: e.target.value})} />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label required">Lokasi</label>
+                  <input type="text" className="form-input" required
+                    value={editingProject.location}
+                    onChange={e => setEditingProject({...editingProject, location: e.target.value})} />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label required">Nilai Kontrak (Rp)</label>
+                  <input type="number" className="form-input" required
+                    value={editingProject.contractValue}
+                    onChange={e => setEditingProject({...editingProject, contractValue: e.target.value})} />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div className="form-group">
+                    <label className="form-label required">Tanggal Mulai</label>
+                    <input type="date" className="form-input" required
+                      value={editingProject.startDate}
+                      onChange={e => setEditingProject({...editingProject, startDate: e.target.value})} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label required">Tanggal Selesai</label>
+                    <input type="date" className="form-input" required
+                      value={editingProject.endDate}
+                      onChange={e => setEditingProject({...editingProject, endDate: e.target.value})} />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 10 }}>
+                  <button type="button" className="btn btn-outline" onClick={() => setEditingProject(null)}>Batal</button>
+                  <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+                    {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
                   </button>
                 </div>
               </form>
